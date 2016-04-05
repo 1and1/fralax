@@ -2,6 +2,7 @@ package net.onenandone.fralax.model;
 
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 
@@ -10,6 +11,7 @@ import lombok.Getter;
  * @author <a href="mailto:daniel.draper@1und1.de">Daniel Draper</a>
  */
 @AllArgsConstructor
+@EqualsAndHashCode
 public class XMLAttribute implements XPathResult{
 
     @Getter
@@ -18,5 +20,7 @@ public class XMLAttribute implements XPathResult{
     private String value;
 
 
-
+    public String prettyPrint() {
+       return (name + " : " + value);
+    }
 }
