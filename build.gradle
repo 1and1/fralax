@@ -1,27 +1,23 @@
+apply plugin: 'java'
+
 group 'net.oneandone'
 version '0.0.1'
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-
+// set default encoding
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
         mavenCentral()
 }
-
-sourceSets {
-        main.java.srcDir 'src'
-}
-
 
 dependencies {
     compile 'com.ximpleware:vtd-xml:2.11'
     compile group: 'org.jdom', name: 'jdom2', version: '2.0.6'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
     compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.17.2', 'stax:stax-api:1.0.1'
-    compile 'junit:junit:4.12'
-    compile 'org.powermock:powermock-module-junit4:1.6.4'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.powermock:powermock-module-junit4:1.6.4'
 }
