@@ -9,6 +9,6 @@ Standard Parser implementation is based on [VTD-XML](http://vtd-xml.sourceforge.
                                                                                         
 **Usage**
 
-See [XmlContext](src/main/java/net/oneandone/fralax/XmlContext.java) and [Fralax](src/main/java/net/oneandone/fralax/Fralax.java) JavaDoc for general usage as well as
+See [XmlContext](src/main/java/net/onenandone/fralax/XmlContext.java) and [Fralax](src/main/java/net/onenandone/fralax/Fralax.java) JavaDoc for general usage as well as
 [FralaxTest](src/test/java/net/onenandone/fralax/FralaxTest.java) for a more specific example.
 
