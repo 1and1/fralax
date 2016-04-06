@@ -56,42 +56,6 @@ public class VtdXMLParserTest {
 
 
 
-    /*public static void main(String args[]) {
-        HashMap<String, String> h = new HashMap<>();
-        h.put("sn", "http://www.1und1.de/n-config.xml");
-        XMLParserFactory fact = new XMLParserDefaultFactory();
-        XPathParser parser = fact.createNewInstance("src/main/resources/test/n-config.xml", h);
-       /* try {
-            for (XMLElement e : ((ListOfXMLElements)parser.searchFor("//sn:router/sn:interface").get()).getElementList()) {
-                System.out.println(e.prettyPrint());
-            }
-        } catch (XPathException e) {
-            e.printStackTrace();
-        }
-        try {
-            for (XMLElement e : ((ListOfXMLElements)parser.searchFor("//sn:router[@id='gw-ps5.slr.lxa.us']//sn:interface").get()).getElementList()) {
-                System.out.println(e.prettyPrint());
-            }
-        }
-         catch (Exception e) {
-            e.printStackTrace();
-        }
-      /*  try {
-            for (XMLAttribute attribute : ((ListOfXMLAttributes) (parser.searchFor("//router[@id='usva3a.bap.glt']/@id").get())).getAttributeList()) {
-                System.out.println(attribute.prettyPrint());
-            }
-
-        } catch (XPathException e) {
-            e.printStackTrace();
-        }
-       /* try {
-            System.out.println(((XMLAttribute)parser.searchFor("//router/@id").get()).prettyPrint());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }*/
 
 
 
