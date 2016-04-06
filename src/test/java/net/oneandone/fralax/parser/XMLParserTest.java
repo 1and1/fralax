@@ -1,6 +1,5 @@
 package net.oneandone.fralax.parser;
 
-import net.onenandone.fralax.parser.XPathType;
 import org.junit.Test;
 import static net.onenandone.fralax.parser.XMLParser.evaluateXPath;
 import static org.junit.Assert.assertEquals;
