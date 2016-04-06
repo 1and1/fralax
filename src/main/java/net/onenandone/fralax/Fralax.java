@@ -1,7 +1,7 @@
 package net.onenandone.fralax;
 
 import com.ximpleware.ParseException;
-import net.onenandone.fralax.parser.VtdXMLParserImpl;
+import net.onenandone.fralax.parser.VtdXmlParser;
 
 import java.io.IOException;
 
@@ -15,13 +15,13 @@ import java.io.IOException;
 public class Fralax {
 
 
-    public static Context parse (final String file) throws IOException, ParseException, InstantiationException, IllegalAccessException {
-        return parse(file, VtdXMLParserImpl.class);
+    public static XmlContext parse (final String file) throws IOException, ParseException, InstantiationException, IllegalAccessException {
+        return parse(file, VtdXmlParser.class);
     }
 
-    public static <T extends Context> T parse(final String file, final Class<? extends XPathParser<T>> xmlParserClass) throws IOException, ParseException, IllegalAccessException, InstantiationException {
-        XPathParser<T> xPathParser = xmlParserClass.newInstance();
-        return xPathParser.parse(file);
+    public static <T extends XmlContext> T parse(final String file, final Class<? extends XmlParser<T>> xmlParserClass) throws IOException, ParseException, IllegalAccessException, InstantiationException {
+        XmlParser<T> xmlParser = xmlParserClass.newInstance();
+        return xmlParser.parse(file);
     }
 
 

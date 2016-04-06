@@ -8,10 +8,10 @@ import java.util.Optional;
  *         Created on 06.04.16.
  * @version 1.0
  */
-public interface Context {
+public interface XmlContext {
     void registerNamespace(final String key, final String value);
-    Optional<Context> select(final String xpath) throws WrongXPathForTypeException;
-    List<Context> selectAll(final String xpath) throws WrongXPathForTypeException;
+    Optional<XmlContext> select(final String xpath) throws WrongXPathForTypeException;
+    List<XmlContext> selectAll(final String xpath) throws WrongXPathForTypeException;
     String asString();
     String asFormattedString();
 }

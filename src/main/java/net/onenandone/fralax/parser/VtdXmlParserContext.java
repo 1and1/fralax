@@ -2,7 +2,7 @@ package net.onenandone.fralax.parser;
 
 import com.ximpleware.*;
 import lombok.extern.slf4j.Slf4j;
-import net.onenandone.fralax.Context;
+import net.onenandone.fralax.XmlContext;
 import net.onenandone.fralax.WrongXPathForTypeException;
 
 import javax.xml.transform.*;
@@ -17,13 +17,13 @@ import java.util.*;
  * @version 1.0
  */
 @Slf4j
-public class VtdParserContext implements Context {
+public class VtdXmlParserContext implements XmlContext {
 
     private AutoPilot autopilot;
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
 
-    public VtdParserContext(String file) throws IOException, ParseException {
+    public VtdXmlParserContext(String file) throws IOException, ParseException {
         File fileToParse = new File(file);
         FileInputStream fileInputStream;
         fileInputStream = new FileInputStream(fileToParse);
@@ -38,7 +38,7 @@ public class VtdParserContext implements Context {
         autopilot = new AutoPilot(navigation);
     }
 
-    private VtdParserContext(byte[] xmlObjectAsByteArray, Map<String, String> registeredNamespaces) throws ParseException {
+    private VtdXmlParserContext(byte[] xmlObjectAsByteArray, Map<String, String> registeredNamespaces) throws ParseException {
         this.registeredNamespaces = registeredNamespaces;
         addNamespacesToAutopilot();
         final VTDGen vtdGen = new VTDGen();
@@ -63,16 +63,16 @@ public class VtdParserContext implements Context {
 
     @Override
     /**
-     * @see Context#select(String)
+     * @see XmlContext#select(String)
      */
-    public Optional<Context> select(String xpath) throws WrongXPathForTypeException {
+    public Optional<XmlContext> select(String xpath) throws WrongXPathForTypeException {
         try {
             autopilot.selectXPath(xpath);
         } catch (XPathParseException e) {
             log.error("Xpath can not be selected from Parser", e);
             throw new WrongXPathForTypeException("Xpath can not be selected from Parser");
         }
-        List<Context> result = selectAll(xpath);
+        List<XmlContext> result = selectAll(xpath);
         if (result.size() > 1) {
             log.error("Xpath selected for ");
             throw new WrongXPathForTypeException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
@@ -85,10 +85,10 @@ public class VtdParserContext implements Context {
 
     @Override
     /**
-     * @see Context#selectAll(String)
+     * @see XmlContext#selectAll(String)
      */
-    public List<Context> selectAll(String xpath) throws WrongXPathForTypeException {
-        List<Context> xmlElements = new ArrayList<>();
+    public List<XmlContext> selectAll(String xpath) throws WrongXPathForTypeException {
+        List<XmlContext> xmlElements = new ArrayList<>();
         try {
             autopilot.selectXPath(xpath);
         } catch (XPathParseException e) {
@@ -129,7 +129,7 @@ public class VtdParserContext implements Context {
                 xpathResultIndex = autopilot.evalXPath();
             }
             for (String s : selectionAsStrings) {
-                xmlElements.add(new VtdParserContext(s.getBytes(), registeredNamespaces));
+                xmlElements.add(new VtdXmlParserContext(s.getBytes(), registeredNamespaces));
             }
             return xmlElements;
         } catch (XPathEvalException | NavException e) {

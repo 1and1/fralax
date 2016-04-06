@@ -2,7 +2,7 @@ package net.onenandone.fralax.parser;
 
 import com.ximpleware.ParseException;
 import lombok.extern.slf4j.Slf4j;
-import net.onenandone.fralax.XPathParser;
+import net.onenandone.fralax.XmlParser;
 
 import java.io.IOException;
 
@@ -13,20 +13,20 @@ import java.io.IOException;
  * @version 1.0
  */
 @Slf4j
-public class VtdXMLParserImpl implements XPathParser<VtdParserContext> {
+public class VtdXmlParser implements XmlParser<VtdXmlParserContext> {
 
-    public VtdXMLParserImpl() {
+    public VtdXmlParser() {
 
     }
 
     @Override
-    public VtdParserContext parse(String file) {
+    public VtdXmlParserContext parse(String file) {
         try {
-            return new VtdParserContext(file);
+            return new VtdXmlParserContext(file);
         } catch (IOException e) {
             log.error("Error in reading Input File " + file, e);
         } catch (ParseException e) {
-            log.error("Error in Parsing the Input File " + file + " with parser " + VtdXMLParserImpl.class.toString(), e);
+            log.error("Error in Parsing the Input File " + file + " with parser " + VtdXmlParser.class.toString(), e);
         }
         return null;
     }

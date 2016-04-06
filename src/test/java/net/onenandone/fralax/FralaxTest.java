@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 public class FralaxTest {
 
-    private Context xml;
+    private XmlContext xml;
 
     @Before
     public void setUp() throws Exception {
@@ -19,7 +19,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectSingleElement() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
@@ -32,7 +32,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectElementWithinContext() throws Exception {
-        Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
+        Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
@@ -51,7 +51,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectListOfElements() throws Exception {
-        final List<Context> contexts = xml.selectAll("/driverVehicleInfo/vehicle");
+        final List<XmlContext> contexts = xml.selectAll("/driverVehicleInfo/vehicle");
 
         assertNotNull(contexts);
         assertEquals(3, contexts.size());
@@ -59,7 +59,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectNonExistingElement() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='Missing Element']");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='Missing Element']");
 
         assertNotNull(optionalContext);
         assertFalse(optionalContext.isPresent());
@@ -67,7 +67,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectAttributeToString() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='AM1']/@id");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='AM1']/@id");
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
@@ -76,7 +76,7 @@ public class FralaxTest {
 
     @Test
     public void testSelectElementValueToString() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='B1']/name/text()");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='B1']/name/text()");
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
@@ -85,7 +85,7 @@ public class FralaxTest {
 
     @Test
     public void testElementToUnformattedString() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<driver><driverId>1</driverId><firstName>John</firstName><lastName>Doe</lastName>" +
@@ -96,7 +96,7 @@ public class FralaxTest {
 
     @Test
     public void testElementToFormattedString() throws Exception {
-        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
+        final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<driver>\n" +

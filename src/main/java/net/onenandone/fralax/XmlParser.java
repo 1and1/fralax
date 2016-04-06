@@ -5,7 +5,7 @@ package net.onenandone.fralax;
  *         Created on 05.04.16.
  * @version 1.0
  */
-public interface XPathParser<T extends Context> {
+public interface XmlParser<T extends XmlContext> {
 
     T parse(final String file);
 
