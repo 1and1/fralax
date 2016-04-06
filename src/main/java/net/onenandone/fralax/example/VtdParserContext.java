@@ -77,8 +77,10 @@ public class VtdParserContext implements Context {
         if (result.size() > 1) {
             log.error("Xpath selected for ");
             throw new WrongXPathForTypeException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
-        } else {
+        } else if (result.size() == 1) {
             return Optional.of(result.get(0));
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -98,9 +100,37 @@ public class VtdParserContext implements Context {
             List<String> selectionAsStrings = new ArrayList<>();
             int xpathResultIndex = autopilot.evalXPath();
             while (xpathResultIndex != -1) {
-                String curElement = navigation.getXPathStringVal();
-                selectionAsStrings.add(curElement);
-                xpathResultIndex = autopilot.evalXPath();
+                //Take into account searches for Attribute/Value of an Element
+                if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_CHARACTER_DATA) {
+                    String curElement = navigation.toNormalizedString(xpathResultIndex);
+                    xmlElements.add(new VtdParserContext(curElement.getBytes(), registeredNamespaces));
+                } else if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_ATTR_NAME) {
+                    String curElement = navigation.toNormalizedString(xpathResultIndex);
+                    curElement = curElement + "=" + navigation.toNormalizedString(xpathResultIndex + 1);
+                    xmlElements.add(new VtdParserContext(curElement.getBytes(), registeredNamespaces));
+                } else {
+                    String curElement = "<" + navigation.toNormalizedString(xpathResultIndex);
+                    for (String attribute : evaluateAttributes()) {
+                        curElement = curElement + " " + attribute;
+                    }
+                    curElement = curElement + ">";
+                    String curOldElement = curElement;
+                    List<List<String>> childrenAndSiblings = evaluateChildrenAndSiblings(navigation.getCurrentDepth(), xpathResultIndex, navigation.getCurrentDepth());
+                    for (String childChild : childrenAndSiblings.get(0)) {
+                        curElement = curElement + childChild;
+                    }
+                    for (String childSibling : childrenAndSiblings.get(1)) {
+                        curElement = curElement + childSibling;
+                    }
+                    if (curOldElement.equals(curElement)) {
+                        navigation.recoverNode(xpathResultIndex);
+                        curElement = curElement + navigation.getXPathStringVal();
+                    }
+                    curElement = curElement + "</" + navigation.toNormalizedString(xpathResultIndex) + ">";
+                    selectionAsStrings.add(curElement);
+                    navigation.recoverNode(xpathResultIndex);
+                    xpathResultIndex = autopilot.evalXPath();
+                }
             }
             for (String s : selectionAsStrings) {
                 xmlElements.add(new VtdParserContext(s.getBytes(), registeredNamespaces));
@@ -109,13 +139,13 @@ public class VtdParserContext implements Context {
         } catch (XPathEvalException | NavException e) {
             if (e.getMessage().contains("binary")) {
                 log.warn("Binary Expressions are not supported", e);
-                throw new WrongXPathForTypeException("EBinary Expressions are not supported");
+                throw new WrongXPathForTypeException("Binary Expressions are not supported");
             } else {
                 log.error("Error when navigating through XPathResults", e);
                 throw new WrongXPathForTypeException("Error when navigating through XPathResults");
             }
         } catch (ParseException e) {
-            log.error("Error when parsing result of XPathSearch", e);
+            log.error("Error when parsing result of XPathSearch as new Context!", e);
             throw new WrongXPathForTypeException("Error when parsing result of XPathSearch");
         }
     }
@@ -131,76 +161,84 @@ public class VtdParserContext implements Context {
         return byteOutputStream.toString();
     }
 
-//
-//    /**
-//     * Used to get all Attributes of the Current Node.
-//     *
-//     * @return A List of all XMLAttributes in the current Node.
-//     * @throws NavException When an Error occurs navigating the attributes;
-//     */
-//    private List<XMLAttribute> evaluateAttributes() throws NavException {
-//        final List<XMLAttribute> attributes = new ArrayList<>();
-//        int attrCount = navigation.getAttrCount();
-//        for (int i = navigation.getCurrentIndex() + 1; i <= navigation.getCurrentIndex() + 1 + attrCount; i += 2) {
-//            String attributeKey = navigation.toNormalizedString(i);
-//            String attributeValue = navigation.toNormalizedString(i + 1);
-//            attributes.add(new XMLAttribute(attributeKey, attributeValue));
-//        }
-//        return attributes;
-//    }
-//
-//
-//    /**
-//     * Used to get All Children of the Current Node as Well as its Siblings. Uses Recursive DFS to find all nodes required then parses them into XMLElements
-//     * and returns as List of Lists with the first element being the children and the second Element being the siblings (each as its own XMLElement List).
-//     *
-//     * @param rootIndex   the rootIndex index we start the search from.
-//     * @param parentIndex the parent Index of the current search.
-//     * @param startDepth  the startDepth of the current iteration.
-//     * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
-//     * @throws NavException Error that occurs when the traversing of Nodes fails.
-//     */
-//    private List<List<XMLElement>> evaluateChildrenAndSiblings(int rootIndex, int parentIndex, int startDepth) throws NavException {
-//        List<XMLElement> children = new ArrayList<>();
-//        List<XMLElement> siblings = new ArrayList<>();
-//        List<List<XMLElement>> result = new ArrayList<>();
-//        result.add(children);
-//        result.add(siblings);
-//        //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
-//        if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
-//            int curIndex = navigation.getCurrentIndex();
-//            XMLElement child = new XMLElement(navigation.toNormalizedString(curIndex));
-//            child.getAttributes().addAll(evaluateAttributes());
-//            List<List<XMLElement>> newChildren = evaluateChildrenAndSiblings(rootIndex, curIndex, startDepth + 1);
-//            child.getChildren().addAll(newChildren.get(0));
-//            children.add(child);
-//            children.addAll(newChildren.get(1));
-//        }
-//        //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
-//        navigation.recoverNode(parentIndex);
-//        //Assignment so the next sibling traversal uses correct depth to determine if we should search for more children.
-//        startDepth--;
-//        //Traversing siblings, uses rootIndex in the check so we don't keep on checking siblings of the node we start our search from.
-//        if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootIndex < navigation.getCurrentDepth()) {
-//            int curIndex = navigation.getCurrentIndex();
-//            XMLElement sibling = new XMLElement(navigation.toNormalizedString(curIndex));
-//            sibling.getAttributes().addAll(evaluateAttributes());
-//            List<List<XMLElement>> newChildren = evaluateChildrenAndSiblings(rootIndex, curIndex, startDepth + 1);
-//            sibling.getChildren().addAll(newChildren.get(0));
-//            siblings.add(sibling);
-//            siblings.addAll(newChildren.get(1));
-//        }
-//        return result;
-//    }
-//
-//    public static void main(String[] args) throws InstantiationException, IllegalAccessException, ParseException, IOException, WrongXPathForTypeException {
-//        Context foo = Fralax.parse("foo");
-//        try {
-//            List<Context> contexts = foo.selectAll("//element/text()");
-//            Collection<String> collect = contexts.stream().map(Context::asString).collect(Collectors.toCollection());
-//        } catch (WrongXPathForTypeException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+    /**
+     * Used to get all Attributes of the Current Node.
+     *
+     * @return A List of all XMLAttributes in the current Node.
+     * @throws NavException When an Error occurs navigating the attributes;
+     */
+    private List<String> evaluateAttributes() throws NavException {
+        final List<String> attributes = new ArrayList<>();
+        int attrCount = navigation.getAttrCount();
+        int curIndex = navigation.getCurrentIndex();
+        for (int i = curIndex + 1; i < curIndex + 1 + attrCount * 2; i += 2) {
+            String attributeKey = navigation.toRawString(i);
+            String attributeValue = navigation.toRawString(i + 1);
+            attributes.add(attributeKey + "=\"" + attributeValue + "\"");
+        }
+        return attributes;
+    }
+
+
+    /**
+     * Used to get All Children of the Current Node as Well as its Siblings. Uses Recursive DFS to find all nodes required then parses them into XMLElements
+     * and returns as List of Lists with the first element being the children and the second Element being the siblings (each as its own XMLElement List).
+     *
+     * @param rootDepth   the rootDepth index we start the search from.
+     * @param parentIndex the parent Index of the current search.
+     * @param startDepth  the startDepth of the current iteration.
+     * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
+     * @throws NavException Error that occurs when the traversing of Nodes fails.
+     */
+    private List<List<String>> evaluateChildrenAndSiblings(int rootDepth, int parentIndex, int startDepth) throws NavException {
+        List<String> children = new ArrayList<>();
+        List<String> siblings = new ArrayList<>();
+        List<List<String>> result = new ArrayList<>();
+        result.add(children);
+        result.add(siblings);
+        //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
+        if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
+            int curIndex = navigation.getCurrentIndex();
+            String child = "<";
+            child = child + navigation.toNormalizedString(curIndex);
+            for (String attribute : evaluateAttributes()) {
+                child = child + " " + attribute;
+            }
+            child = child + ">";
+            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+            for (String childChild : newChildren.get(0)) {
+                child = child + childChild;
+            }
+            child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+            children.add(child);
+            children.addAll(newChildren.get(1));
+        } else {
+            children.add(navigation.getXPathStringVal());
+        }
+
+        //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
+        navigation.recoverNode(parentIndex);
+        //Assignment so the next sibling traversal uses correct depth to determine if we should search for more children.
+        startDepth--;
+        //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
+        if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
+            int curIndex = navigation.getCurrentIndex();
+            String sibling = "<";
+            sibling = sibling + navigation.toNormalizedString(curIndex);
+            for (String attribute : evaluateAttributes()) {
+                sibling = sibling + " " + attribute;
+            }
+            sibling = sibling + ">";
+            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+            for (String childChild : newChildren.get(0)) {
+                sibling = sibling + childChild;
+            }
+            sibling = sibling + "</" + navigation.toNormalizedString(curIndex) + ">";
+            siblings.add(sibling);
+            siblings.addAll(newChildren.get(1));
+        }
+        return result;
+    }
 
 }
