@@ -21,6 +21,7 @@ public class FralaxTest {
     @Test
     public void testSelectSingleElement() throws Exception {
         final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
+
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
     }
@@ -28,6 +29,7 @@ public class FralaxTest {
     @Test
     public void testSelectListOfElements() throws Exception {
         final List<Context> contexts = xml.selectAll("/driverVehicleInfo/vehicle");
+
         assertNotNull(contexts);
         assertEquals(3, contexts.size());
     }
@@ -63,15 +65,14 @@ public class FralaxTest {
         final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
-        assertEquals(
-                "<driver>\n" +
-                "   <driverId>1</driverId>\n" +
-                "   <firstName>John</firstName>\n" +
-                "   <lastName>Doe</lastName>\n" +
-                "   <vehicleId>1</vehicleId>\n" +
-                "   <vehicleId>2</vehicleId>\n" +
-                "</driver>",
-                optionalContext.get().asString()
+        assertEquals("<driver>\n" +
+                        "  <driverId>1</driverId>\n" +
+                        "  <firstName>John</firstName>\n" +
+                        "  <lastName>Doe</lastName>\n" +
+                        "  <vehicleId>1</vehicleId>\n" +
+                        "  <vehicleId>2</vehicleId>\n" +
+                        "</driver>\n",
+                optionalContext.get().asFormattedString()
         );
     }
 }

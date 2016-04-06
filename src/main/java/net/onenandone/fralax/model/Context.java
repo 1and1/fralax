@@ -13,4 +13,5 @@ public interface Context {
     Optional<Context> select(final String xpath) throws WrongXPathForTypeException;
     List<Context> selectAll(final String xpath) throws WrongXPathForTypeException;
     String asString();
+    String asFormattedString();
 }
