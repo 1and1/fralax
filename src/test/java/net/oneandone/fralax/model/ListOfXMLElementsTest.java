@@ -1,8 +1,5 @@
 package net.oneandone.fralax.model;
 
-import net.onenandone.fralax.model.ListOfXMLElements;
-import net.onenandone.fralax.model.XMLAttribute;
-import net.onenandone.fralax.model.XMLElement;
 import org.junit.Before;
 import org.junit.Test;
 

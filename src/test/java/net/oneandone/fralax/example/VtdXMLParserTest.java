@@ -1,9 +1,5 @@
 package net.oneandone.fralax.example;
 
-import net.onenandone.fralax.model.ListOfXMLAttributes;
-import net.onenandone.fralax.model.XMLElement;
-import net.onenandone.fralax.model.XPathResult;
-import net.onenandone.fralax.parser.XMLParserDefaultFactory;
 import net.onenandone.fralax.parser.XPathParser;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,13 +49,4 @@ public class VtdXMLParserTest {
             }
 
     }
-
-
-
-
-
-
-
-
-
 }
