@@ -1,8 +1,8 @@
-package net.onenandone.fralax.example;
+package net.onenandone.fralax.parser;
 
 import com.ximpleware.ParseException;
 import lombok.extern.slf4j.Slf4j;
-import net.onenandone.fralax.parser.XPathParser;
+import net.onenandone.fralax.XPathParser;
 
 import java.io.IOException;
 

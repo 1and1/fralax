@@ -1,8 +1,7 @@
-package net.onenandone.fralax.parser;
+package net.onenandone.fralax;
 
 import com.ximpleware.ParseException;
-import net.onenandone.fralax.example.VtdXMLParserImpl;
-import net.onenandone.fralax.model.Context;
+import net.onenandone.fralax.parser.VtdXMLParserImpl;
 
 import java.io.IOException;
 

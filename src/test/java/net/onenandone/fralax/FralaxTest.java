@@ -1,7 +1,5 @@
-package net.onenandone.fralax.parser;
+package net.onenandone.fralax;
 
-import net.onenandone.fralax.model.Context;
-import net.onenandone.fralax.model.WrongXPathForTypeException;
 import org.junit.Before;
 import org.junit.Test;
 

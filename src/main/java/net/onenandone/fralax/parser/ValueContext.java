@@ -1,7 +1,7 @@
-package net.onenandone.fralax.example;
+package net.onenandone.fralax.parser;
 
-import net.onenandone.fralax.model.Context;
-import net.onenandone.fralax.model.WrongXPathForTypeException;
+import net.onenandone.fralax.Context;
+import net.onenandone.fralax.WrongXPathForTypeException;
 
 import java.util.List;
 import java.util.Optional;

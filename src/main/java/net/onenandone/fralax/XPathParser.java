@@ -1,6 +1,4 @@
-package net.onenandone.fralax.parser;
-
-import net.onenandone.fralax.model.Context;
+package net.onenandone.fralax;
 
 /**
  * @author <a href="mailto:daniel.draper@1und1.de">Daniel Draper</a>

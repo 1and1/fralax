@@ -1,9 +1,9 @@
-package net.onenandone.fralax.example;
+package net.onenandone.fralax.parser;
 
 import com.ximpleware.*;
 import lombok.extern.slf4j.Slf4j;
-import net.onenandone.fralax.model.Context;
-import net.onenandone.fralax.model.WrongXPathForTypeException;
+import net.onenandone.fralax.Context;
+import net.onenandone.fralax.WrongXPathForTypeException;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;

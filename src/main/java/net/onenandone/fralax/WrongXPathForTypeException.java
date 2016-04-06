@@ -1,4 +1,4 @@
-package net.onenandone.fralax.model;
+package net.onenandone.fralax;
 
 import javax.xml.xpath.XPathException;
 
