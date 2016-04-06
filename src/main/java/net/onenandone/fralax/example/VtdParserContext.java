@@ -38,7 +38,6 @@ public class VtdParserContext implements Context {
         autopilot = new AutoPilot(navigation);
     }
 
-
     private VtdParserContext(byte[] xmlObjectAsByteArray, Map<String, String> registeredNamespaces) throws ParseException {
         this.registeredNamespaces = registeredNamespaces;
         addNamespacesToAutopilot();
@@ -102,12 +101,9 @@ public class VtdParserContext implements Context {
             while (xpathResultIndex != -1) {
                 //Take into account searches for Attribute/Value of an Element
                 if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_CHARACTER_DATA) {
-                    String curElement = navigation.toNormalizedString(xpathResultIndex);
-                    xmlElements.add(new VtdParserContext(curElement.getBytes(), registeredNamespaces));
+                    xmlElements.add(new ValueContext(navigation.toNormalizedString(xpathResultIndex)));
                 } else if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_ATTR_NAME) {
-                    String curElement = navigation.toNormalizedString(xpathResultIndex);
-                    curElement = curElement + "=" + navigation.toNormalizedString(xpathResultIndex + 1);
-                    xmlElements.add(new VtdParserContext(curElement.getBytes(), registeredNamespaces));
+                    xmlElements.add(new ValueContext(navigation.toNormalizedString(xpathResultIndex + 1)));
                 } else {
                     String curElement = "<" + navigation.toNormalizedString(xpathResultIndex);
                     for (String attribute : evaluateAttributes()) {
@@ -129,8 +125,8 @@ public class VtdParserContext implements Context {
                     curElement = curElement + "</" + navigation.toNormalizedString(xpathResultIndex) + ">";
                     selectionAsStrings.add(curElement);
                     navigation.recoverNode(xpathResultIndex);
-                    xpathResultIndex = autopilot.evalXPath();
                 }
+                xpathResultIndex = autopilot.evalXPath();
             }
             for (String s : selectionAsStrings) {
                 xmlElements.add(new VtdParserContext(s.getBytes(), registeredNamespaces));
