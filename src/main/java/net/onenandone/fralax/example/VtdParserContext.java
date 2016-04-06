@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.onenandone.fralax.model.Context;
 import net.onenandone.fralax.model.WrongXPathForTypeException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -161,6 +161,23 @@ public class VtdParserContext implements Context {
         return byteOutputStream.toString();
     }
 
+    @Override
+    public String asFormattedString() {
+        try {
+            final Source xmlInput = new StreamSource(new StringReader(asString()));
+            final StringWriter stringWriter = new StringWriter();
+            final StreamResult xmlOutput = new StreamResult(stringWriter);
+            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setAttribute("indent-number", 2);
+            final Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.transform(xmlInput, xmlOutput);
+            return xmlOutput.getWriter().toString();
+        } catch (final TransformerException e) {
+            throw new RuntimeException("could not format string", e);
+        }
+    }
 
     /**
      * Used to get all Attributes of the Current Node.
