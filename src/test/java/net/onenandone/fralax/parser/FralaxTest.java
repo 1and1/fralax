@@ -28,7 +28,6 @@ public class FralaxTest {
     @Test
     public void testSelectListOfElements() throws Exception {
         final List<Context> contexts = xml.selectAll("/driverVehicleInfo/vehicle");
-
         assertNotNull(contexts);
         assertEquals(3, contexts.size());
     }
@@ -56,13 +55,12 @@ public class FralaxTest {
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
-        assertEquals("Bus", optionalContext.get());
+        assertEquals("Bus", optionalContext.get().asString());
     }
 
     @Test
     public void testElementToString() throws Exception {
         final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
-
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals(
@@ -73,7 +71,7 @@ public class FralaxTest {
                 "   <vehicleId>1</vehicleId>\n" +
                 "   <vehicleId>2</vehicleId>\n" +
                 "</driver>",
-                optionalContext.get()
+                optionalContext.get().asString()
         );
     }
 }
