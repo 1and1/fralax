@@ -11,9 +11,10 @@ import java.io.*;
 import java.util.*;
 
 /**
- * @author <a href="mailto:daniel.draper@1und1.de">Daniel Draper</a>
+ * @author Daniel Draper Johann Bähler
  *         Created on 06.04.16.
  * @version 1.0
+ *          Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
  */
 class VtdXmlParserContext implements XmlContext {
 
@@ -21,10 +22,17 @@ class VtdXmlParserContext implements XmlContext {
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
 
+
+    /**
+     * Default constructor used to create a newly parsed XMLContext from a certain file.
+     *
+     * @param file the file to parse.
+     * @throws IOException    thrown when an error occurs while opening the file.
+     * @throws ParseException thrown when an error occurs during parsing of the xml file.
+     */
     VtdXmlParserContext(String file) throws IOException, ParseException {
         File fileToParse = new File(file);
-        FileInputStream fileInputStream;
-        fileInputStream = new FileInputStream(fileToParse);
+        FileInputStream fileInputStream = new FileInputStream(fileToParse);
         byte[] xmlByteArray = new byte[(int) fileToParse.length()];
         if (fileInputStream.read(xmlByteArray) != xmlByteArray.length) {
             throw new IOException("Error when reading the XML File");
@@ -36,6 +44,13 @@ class VtdXmlParserContext implements XmlContext {
         autopilot = new AutoPilot(navigation);
     }
 
+    /**
+     * Private Constructor used to create new contexts from the result of an earlier XPathQuery by passing it as its byte value and reapplying the VTD-XML-Parser.
+     *
+     * @param xmlObjectAsByteArray XmlObject to parse as a byte array.
+     * @param registeredNamespaces Namespaces to use for the creation, as we have to set the same namespaces as were used in the earlier XPathSearch.
+     * @throws ParseException when an error occurs parsing the input object.
+     */
     private VtdXmlParserContext(byte[] xmlObjectAsByteArray, Map<String, String> registeredNamespaces) throws ParseException {
         this.registeredNamespaces = registeredNamespaces;
         addNamespacesToAutopilot();
@@ -48,11 +63,18 @@ class VtdXmlParserContext implements XmlContext {
 
 
     @Override
+    /**
+     * @see net.onenandone.fralax.XmlContext#registerNamespace(String, String)
+     */
     public void registerNamespace(String key, String value) {
         registeredNamespaces.put(key, value);
         addNamespacesToAutopilot();
     }
 
+
+    /**
+     * Adds all registered Namespaces to the Autopilot for evaluation.
+     */
     private void addNamespacesToAutopilot() {
         for (Map.Entry<String, String> entry : registeredNamespaces.entrySet()) {
             autopilot.declareXPathNameSpace(entry.getKey(), entry.getValue());
@@ -139,6 +161,9 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
+    /**
+     * @see XmlContext#asString()
+     */
     public String asString() {
         ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
         try {
@@ -150,6 +175,9 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
+    /**
+     * @see XmlContext#asFormattedString()
+     */
     public String asFormattedString() {
         try {
             final Source xmlInput = new StreamSource(new StringReader(asString()));

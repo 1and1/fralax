@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
+
 public class FralaxTest {
 
     private XmlContext xml;
@@ -46,6 +47,7 @@ public class FralaxTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testSubsequentSelectFromValue() throws Exception {
+        //noinspection OptionalGetWithoutIsPresent
         xml.select("/driverVehicleInfo/vehicle[@id='AM1']/@id").get().select("/anything");
     }
 
@@ -108,5 +110,20 @@ public class FralaxTest {
                         "</driver>\n",
                 optionalContext.get().asFormattedString()
         );
+    }
+
+
+    @Test
+    public void testSelectListOfAttributes() throws Exception {
+        final List<XmlContext> contexts = xml.selectAll("//@id");
+        assertEquals(3, contexts.size());
+        assertEquals("RR1", contexts.get(0).asFormattedString());
+        assertEquals("AM1", contexts.get(1).asFormattedString());
+        assertEquals("B1", contexts.get(2).asFormattedString());
+    }
+
+    @Test(expected = FralaxException.class)
+    public void testSelectBinaryExpression() throws Exception {
+        xml.selectAll("@id='RR1'");
     }
 }
