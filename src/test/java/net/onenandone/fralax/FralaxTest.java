@@ -25,7 +25,7 @@ public class FralaxTest {
         assertTrue(optionalContext.isPresent());
     }
 
-    @Test(expected = WrongXPathForTypeException.class)
+    @Test(expected = FralaxException.class)
     public void testSelectMultipleElementsForSingleSelect() throws Exception {
         xml.select("/driverVehicleInfo/vehicle");
     }

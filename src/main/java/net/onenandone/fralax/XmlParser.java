@@ -5,8 +5,8 @@ package net.onenandone.fralax;
  *         Created on 05.04.16.
  * @version 1.0
  */
-public interface XmlParser<T extends XmlContext> {
+public interface XmlParser {
 
-    T parse(final String file);
+    XmlContext parse(final String file);
 
 }

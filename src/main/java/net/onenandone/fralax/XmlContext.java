@@ -10,8 +10,8 @@ import java.util.Optional;
  */
 public interface XmlContext {
     void registerNamespace(final String key, final String value);
-    Optional<XmlContext> select(final String xpath) throws WrongXPathForTypeException;
-    List<XmlContext> selectAll(final String xpath) throws WrongXPathForTypeException;
+    Optional<XmlContext> select(final String xpath) throws FralaxException;
+    List<XmlContext> selectAll(final String xpath) throws FralaxException;
     String asString();
     String asFormattedString();
 }

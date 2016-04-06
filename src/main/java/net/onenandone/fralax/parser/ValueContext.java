@@ -1,7 +1,7 @@
 package net.onenandone.fralax.parser;
 
 import net.onenandone.fralax.XmlContext;
-import net.onenandone.fralax.WrongXPathForTypeException;
+import net.onenandone.fralax.FralaxException;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +10,7 @@ class ValueContext implements XmlContext {
 
     private final String value;
 
-    public ValueContext(final String value) {
+    ValueContext(final String value) {
         this.value = value;
     }
 
@@ -20,12 +20,12 @@ class ValueContext implements XmlContext {
     }
 
     @Override
-    public Optional<XmlContext> select(String xpath) throws WrongXPathForTypeException {
+    public Optional<XmlContext> select(String xpath) throws FralaxException {
         throw new UnsupportedOperationException("cannot select elements within value context");
     }
 
     @Override
-    public List<XmlContext> selectAll(String xpath) throws WrongXPathForTypeException {
+    public List<XmlContext> selectAll(String xpath) throws FralaxException {
         throw new UnsupportedOperationException("cannot select elements within value context");
     }
 

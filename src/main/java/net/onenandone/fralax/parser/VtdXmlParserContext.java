@@ -1,9 +1,8 @@
 package net.onenandone.fralax.parser;
 
 import com.ximpleware.*;
-import lombok.extern.slf4j.Slf4j;
 import net.onenandone.fralax.XmlContext;
-import net.onenandone.fralax.WrongXPathForTypeException;
+import net.onenandone.fralax.FralaxException;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
@@ -16,14 +15,13 @@ import java.util.*;
  *         Created on 06.04.16.
  * @version 1.0
  */
-@Slf4j
-public class VtdXmlParserContext implements XmlContext {
+class VtdXmlParserContext implements XmlContext {
 
     private AutoPilot autopilot;
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
 
-    public VtdXmlParserContext(String file) throws IOException, ParseException {
+    VtdXmlParserContext(String file) throws IOException, ParseException {
         File fileToParse = new File(file);
         FileInputStream fileInputStream;
         fileInputStream = new FileInputStream(fileToParse);
@@ -65,17 +63,15 @@ public class VtdXmlParserContext implements XmlContext {
     /**
      * @see XmlContext#select(String)
      */
-    public Optional<XmlContext> select(String xpath) throws WrongXPathForTypeException {
+    public Optional<XmlContext> select(String xpath) throws FralaxException {
         try {
             autopilot.selectXPath(xpath);
         } catch (XPathParseException e) {
-            log.error("Xpath can not be selected from Parser", e);
-            throw new WrongXPathForTypeException("Xpath can not be selected from Parser");
+            throw new FralaxException("Xpath can not be selected from Parser", e);
         }
         List<XmlContext> result = selectAll(xpath);
         if (result.size() > 1) {
-            log.error("Xpath selected for ");
-            throw new WrongXPathForTypeException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
+            throw new FralaxException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
         } else if (result.size() == 1) {
             return Optional.of(result.get(0));
         } else {
@@ -87,13 +83,12 @@ public class VtdXmlParserContext implements XmlContext {
     /**
      * @see XmlContext#selectAll(String)
      */
-    public List<XmlContext> selectAll(String xpath) throws WrongXPathForTypeException {
+    public List<XmlContext> selectAll(String xpath) throws FralaxException {
         List<XmlContext> xmlElements = new ArrayList<>();
         try {
             autopilot.selectXPath(xpath);
         } catch (XPathParseException e) {
-            log.error("Xpath can not be selected from Parser", e);
-            throw new WrongXPathForTypeException("Xpath can not be selected from Parser");
+            throw new FralaxException("Xpath can not be selected from Parser", e);
         }
         try {
             List<String> selectionAsStrings = new ArrayList<>();
@@ -134,15 +129,12 @@ public class VtdXmlParserContext implements XmlContext {
             return xmlElements;
         } catch (XPathEvalException | NavException e) {
             if (e.getMessage().contains("binary")) {
-                log.warn("Binary Expressions are not supported", e);
-                throw new WrongXPathForTypeException("Binary Expressions are not supported");
+                throw new FralaxException("Binary Expressions are not supported", e);
             } else {
-                log.error("Error when navigating through XPathResults", e);
-                throw new WrongXPathForTypeException("Error when navigating through XPathResults");
+                throw new FralaxException("Error when navigating through XPathResults", e);
             }
         } catch (ParseException e) {
-            log.error("Error when parsing result of XPathSearch as new Context!", e);
-            throw new WrongXPathForTypeException("Error when parsing result of XPathSearch");
+            throw new FralaxException("Error when parsing result of XPathSearch", e);
         }
     }
 
@@ -152,7 +144,7 @@ public class VtdXmlParserContext implements XmlContext {
         try {
             navigation.dumpXML(byteOutputStream);
         } catch (IOException e) {
-            log.error("Error when dumping xml state");
+            throw new FralaxException("failed to dump xml state", e);
         }
         return byteOutputStream.toString();
     }
@@ -171,7 +163,7 @@ public class VtdXmlParserContext implements XmlContext {
             transformer.transform(xmlInput, xmlOutput);
             return xmlOutput.getWriter().toString();
         } catch (final TransformerException e) {
-            throw new RuntimeException("could not format string", e);
+            throw new FralaxException("could not format string", e);
         }
     }
 
