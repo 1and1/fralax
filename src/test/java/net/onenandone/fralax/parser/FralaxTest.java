@@ -1,6 +1,7 @@
 package net.onenandone.fralax.parser;
 
 import net.onenandone.fralax.model.Context;
+import net.onenandone.fralax.model.WrongXPathForTypeException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +25,30 @@ public class FralaxTest {
 
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
+    }
+
+    @Test(expected = WrongXPathForTypeException.class)
+    public void testSelectMultipleElementsForSingleSelect() throws Exception {
+        xml.select("/driverVehicleInfo/vehicle");
+    }
+
+    @Test
+    public void testSelectElementWithinContext() throws Exception {
+        Optional<Context> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
+
+        assertNotNull(optionalContext);
+        assertTrue(optionalContext.isPresent());
+
+        optionalContext = optionalContext.get().select("/vehicle/name/text()");
+
+        assertNotNull(optionalContext);
+        assertTrue(optionalContext.isPresent());
+        assertEquals("Limousine", optionalContext.get().asString());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSubsequentSelectFromValue() throws Exception {
+        xml.select("/driverVehicleInfo/vehicle[@id='AM1']/@id").get().select("/anything");
     }
 
     @Test
@@ -61,7 +86,18 @@ public class FralaxTest {
     }
 
     @Test
-    public void testElementToString() throws Exception {
+    public void testElementToUnformattedString() throws Exception {
+        final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
+        assertNotNull(optionalContext);
+        assertTrue(optionalContext.isPresent());
+        assertEquals("<driver><driverId>1</driverId><firstName>John</firstName><lastName>Doe</lastName>" +
+                        "<vehicleId>1</vehicleId><vehicleId>2</vehicleId></driver>",
+                optionalContext.get().asString()
+        );
+    }
+
+    @Test
+    public void testElementToFormattedString() throws Exception {
         final Optional<Context> optionalContext = xml.select("/driverVehicleInfo/driver[1]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
