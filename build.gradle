@@ -15,9 +15,6 @@ repositories {
 
 dependencies {
     compile 'com.ximpleware:vtd-xml:2.11'
-    compile group: 'org.jdom', name: 'jdom2', version: '2.0.6'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
-    compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.17.2', 'stax:stax-api:1.0.1'
     testCompile 'junit:junit:4.12'
-    testCompile 'org.powermock:powermock-module-junit4:1.6.4'
 }

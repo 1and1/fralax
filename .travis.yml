@@ -1,0 +1,6 @@
+language: java
+script: gradle test --info
+jdk:
+  - oraclejdk8
+os:
+  - linux
