@@ -1,4 +1,4 @@
-*Current build status:* [![Travis CI](https://travis-ci.org/1and1/fralax.svg?branch=master)](https://travis-ci.org/1and1/fralax)[![Codacy Badge](https://api.codacy.com/project/badge/grade/021a8a9c3b454ad9a72066051fd5b29c)](https://www.codacy.com/app/sysdev/fralax)
+*Current build status:* [![Travis CI](https://travis-ci.org/1and1/fralax.svg?branch=master)](https://travis-ci.org/1and1/fralax) [![Codacy Badge](https://api.codacy.com/project/badge/grade/021a8a9c3b454ad9a72066051fd5b29c)](https://www.codacy.com/app/sysdev/fralax)
 
 **Framework for Large XML File Parsing \[FraLaX\]**
 
