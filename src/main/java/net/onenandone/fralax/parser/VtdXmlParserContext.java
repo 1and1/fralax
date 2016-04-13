@@ -246,8 +246,8 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     private static class ChildrenAndSiblings {
-        final List<String> children = new ArrayList<>();
-        final List<String> siblings = new ArrayList<>();
+        private final List<String> children = new ArrayList<>();
+        private final List<String> siblings = new ArrayList<>();
     }
 
 }
