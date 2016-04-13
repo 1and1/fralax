@@ -208,7 +208,7 @@ class VtdXmlParserContext implements XmlContext {
      * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
      * @throws NavException Error that occurs when the traversing of Nodes fails.
      */
-    private ChildrenAndSiblings evaluateChildrenAndSiblings(int rootDepth, int parentIndex, int startDepth) throws NavException {
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
         ChildrenAndSiblings childrenAndSiblings = new ChildrenAndSiblings();
         //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
@@ -220,10 +220,10 @@ class VtdXmlParserContext implements XmlContext {
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
         navigation.recoverNode(parentIndex);
         //Assignment so the next sibling traversal uses correct depth to determine if we should search for more children.
-        startDepth--;
+        final int newStartDepth = startDepth - 1;
         //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
         if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
-            traverse(rootDepth, startDepth, childrenAndSiblings.siblings);
+            traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings);
         }
         return childrenAndSiblings;
     }
