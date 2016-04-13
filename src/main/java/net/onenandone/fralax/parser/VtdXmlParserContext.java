@@ -139,11 +139,11 @@ class VtdXmlParserContext implements XmlContext {
             }
             curElement = curElement + ">";
             String curOldElement = curElement;
-            List<List<String>> childrenAndSiblings = evaluateChildrenAndSiblings(selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
-            for (String childChild : childrenAndSiblings.get(0)) {
+            final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
+            for (final String childChild : childrenAndSiblings.children) {
                 curElement = curElement + childChild;
             }
-            for (String childSibling : childrenAndSiblings.get(1)) {
+            for (final String childSibling : childrenAndSiblings.siblings) {
                 curElement = curElement + childSibling;
             }
             if (curOldElement.equals(curElement)) {
@@ -208,30 +208,13 @@ class VtdXmlParserContext implements XmlContext {
      * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
      * @throws NavException Error that occurs when the traversing of Nodes fails.
      */
-    private List<List<String>> evaluateChildrenAndSiblings(int rootDepth, int parentIndex, int startDepth) throws NavException {
-        List<String> children = new ArrayList<>();
-        List<String> siblings = new ArrayList<>();
-        List<List<String>> result = new ArrayList<>();
-        result.add(children);
-        result.add(siblings);
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(int rootDepth, int parentIndex, int startDepth) throws NavException {
+        ChildrenAndSiblings childrenAndSiblings = new ChildrenAndSiblings();
         //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
-            int curIndex = navigation.getCurrentIndex();
-            String child = "<";
-            child = child + navigation.toNormalizedString(curIndex);
-            for (String attribute : evaluateAttributes()) {
-                child = child + " " + attribute;
-            }
-            child = child + ">";
-            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
-            for (String childChild : newChildren.get(0)) {
-                child = child + childChild;
-            }
-            child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
-            children.add(child);
-            children.addAll(newChildren.get(1));
+            traverse(rootDepth, startDepth, childrenAndSiblings.children);
         } else {
-            children.add(navigation.getXPathStringVal());
+            childrenAndSiblings.children.add(navigation.getXPathStringVal());
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
@@ -240,22 +223,31 @@ class VtdXmlParserContext implements XmlContext {
         startDepth--;
         //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
         if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
-            int curIndex = navigation.getCurrentIndex();
-            String sibling = "<";
-            sibling = sibling + navigation.toNormalizedString(curIndex);
-            for (String attribute : evaluateAttributes()) {
-                sibling = sibling + " " + attribute;
-            }
-            sibling = sibling + ">";
-            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
-            for (String childChild : newChildren.get(0)) {
-                sibling = sibling + childChild;
-            }
-            sibling = sibling + "</" + navigation.toNormalizedString(curIndex) + ">";
-            siblings.add(sibling);
-            siblings.addAll(newChildren.get(1));
+            traverse(rootDepth, startDepth, childrenAndSiblings.siblings);
         }
-        return result;
+        return childrenAndSiblings;
+    }
+
+    private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
+        int curIndex = navigation.getCurrentIndex();
+        String child = "<";
+        child = child + navigation.toNormalizedString(curIndex);
+        for (final String attribute : evaluateAttributes()) {
+            child = child + " " + attribute;
+        }
+        child = child + ">";
+        final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+        for (final String childChild : childrenAndSiblings.children) {
+            child = child + childChild;
+        }
+        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+        elements.add(child);
+        elements.addAll(childrenAndSiblings.siblings);
+    }
+
+    private static class ChildrenAndSiblings {
+        final List<String> children = new ArrayList<>();
+        final List<String> siblings = new ArrayList<>();
     }
 
 }
