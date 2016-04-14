@@ -12,3 +12,12 @@ Standard Parser implementation is based on [VTD-XML](http://vtd-xml.sourceforge.
 See [XmlContext](src/main/java/net/onenandone/fralax/XmlContext.java) and [Fralax](src/main/java/net/onenandone/fralax/Fralax.java) JavaDoc for general usage as well as
 [FralaxTest](src/test/java/net/onenandone/fralax/FralaxTest.java) for a more specific example.
 
+**Contribution**
+
+This section describes some points about contribution process for fralax package.
+The project is being developed within community. Maintainer merges pull-requests, fixes critical bugs, etc.
+
+If you fixed or added something useful to the project, you can send pull-request. It will be reviewed by two [maintainers](https://github.com/1and1/fralax/blob/master/MAINTAINERS) and accepted, or commented for rework, or declined.
+
+We are using [LGTM](https://lgtm.co) to approve pull-request. The pull-request is only accepted if two maintainers comment with ["LGTM"](https://lgtm.co) or "+1".
+
