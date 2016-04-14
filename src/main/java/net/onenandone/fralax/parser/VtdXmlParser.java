@@ -11,9 +11,6 @@ import java.io.IOException;
 
 /**
  * A VtdXmlParser based on XPath and using <a href="http://vtd-xml.sourceforge.net/">VTD-XML</a> as the underlying parser.
- *
- * @author Daniel Draper Johann Bähler
- * @version 1.0
  */
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class VtdXmlParser implements XmlParser {

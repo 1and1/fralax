@@ -2,9 +2,6 @@ package net.onenandone.fralax;
 
 /**
  * Exception thrown by Fralax-Related classes when errors occur during parsing.
- *
- * @author Daniel Draper Johann Bähler
- * @version 1.0
  */
 public class FralaxException extends RuntimeException {
 

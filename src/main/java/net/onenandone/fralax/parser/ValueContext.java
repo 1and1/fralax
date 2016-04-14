@@ -10,9 +10,6 @@ import java.util.Optional;
  * A XMLContext representing a single value in an XML document.
  * E.g what is returned after searching for a single attribute value ("/driver/@id")
  * Does not support further searching using xpath queries.
- *
- * @author Johann Bähler
- * @version 1.0
  */
 class ValueContext implements XmlContext {
 

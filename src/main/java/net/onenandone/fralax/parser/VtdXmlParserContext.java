@@ -12,9 +12,6 @@ import java.util.*;
 
 /**
  * Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
- *
- * @author Daniel Draper Johann Bähler
- * @version 1.0
  */
 class VtdXmlParserContext implements XmlContext {
 

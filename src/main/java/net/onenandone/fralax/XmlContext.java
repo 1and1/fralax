@@ -5,9 +5,6 @@ import java.util.Optional;
 
 /**
  * Represents a parsed XmlFile or result of an executed XPath-Query.
- *
- * @author Daniel Draper Johann Böhler
- * @version 1.0
  */
 public interface XmlContext {
 

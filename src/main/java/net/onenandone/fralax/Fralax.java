@@ -7,9 +7,6 @@ import java.util.Objects;
 /**
  * Factory used to create the default (Vtd) XMLParser or a specific parser.
  * Requirement for the static factory function to work for new Implementations: Default constructor must be visible.
- *
- * @author Daniel Draper Johann Bähler
- * @version 1.0
  */
 public class Fralax {
 
