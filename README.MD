@@ -1,4 +1,4 @@
-*Current build status:* [![Travis CI](https://travis-ci.org/1and1/fralax.svg?branch=master)](https://travis-ci.org/1and1/fralax) [![Codacy Badge](https://api.codacy.com/project/badge/grade/021a8a9c3b454ad9a72066051fd5b29c)](https://www.codacy.com/app/sysdev/fralax)
+*Current build status:* [![Travis CI](https://travis-ci.org/1and1/fralax.svg?branch=master)](https://travis-ci.org/1and1/fralax) [![Codacy Badge](https://api.codacy.com/project/badge/grade/021a8a9c3b454ad9a72066051fd5b29c)](https://www.codacy.com/app/sysdev/fralax) [![Codacy Badge](https://api.codacy.com/project/badge/coverage/021a8a9c3b454ad9a72066051fd5b29c)](https://www.codacy.com/app/1and1_NDev/fralax)
 
 **Framework for Large XML File Parsing \[FraLaX\]**
 
@@ -19,5 +19,5 @@ The project is being developed by the community. Maintainer merge pull-requests,
 
 If you fixed or added something useful to the project, you can send a pull-request. It will be reviewed and accepted, or commented on for rework by at least two [maintainers](https://github.com/1and1/fralax/blob/master/MAINTAINERS). Pull-requests are declined if a maintainer closes the request. 
 
-We are using [LGTM](https://lgtm.co) to approve pull-requests. The pull-request is only accepted if two maintainers comment with ["LGTM"](https://lgtm.co) or "+1".
+We are using [LGTM](https://lgtm.co) to approve pull-requests. The pull-request is only accepted if two maintainers comment with ["LGTM"](https://lgtm.co) or ":+1:".
 

@@ -8,12 +8,6 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-/*
-autopilot.selectXPath("/driverVehicleInfo/vehicle");
-autopilot.evalXPath();
-autopilot.selectXPath("name");
-autopilot.evalXPath();
- */
 public class FralaxTest {
 
     private XmlContext xml;

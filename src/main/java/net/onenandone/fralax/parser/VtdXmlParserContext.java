@@ -12,9 +12,6 @@ import java.util.*;
 
 /**
  * Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
- *
- * @author Daniel Draper Johann Böhler
- * @version 1.0
  */
 class VtdXmlParserContext implements XmlContext {
 
@@ -52,18 +49,13 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    /**
-     * @see net.onenandone.fralax.XmlContext#registerNamespace(String, String)
-     */
     public void registerNamespace(String key, String value) {
         registeredNamespaces.put(key, value);
         addNamespacesToAutopilot(autopilot, registeredNamespaces);
     }
 
 
-    /**
-     * Adds all registered Namespaces to the Autopilot for evaluation.
-     */
+    /** Adds all registered Namespaces to the Autopilot for evaluation. */
     private static void addNamespacesToAutopilot(final AutoPilot autopilot, final Map<String, String> registeredNamespaces) {
         for (Map.Entry<String, String> entry : registeredNamespaces.entrySet()) {
             autopilot.declareXPathNameSpace(entry.getKey(), entry.getValue());
@@ -71,9 +63,6 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    /**
-     * @see XmlContext#select(String)
-     */
     public Optional<XmlContext> select(String xpath) throws FralaxException {
         final List<XmlContext> result = selectAll(xpath);
         if (result.size() > 1) {
@@ -86,9 +75,6 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    /**
-     * @see XmlContext#selectAll(String)
-     */
     public List<XmlContext> selectAll(String xpath) throws FralaxException {
         final List<XmlContext> xmlElements = new ArrayList<>();
 
@@ -126,9 +112,6 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    /**
-     * @see XmlContext#asString()
-     */
     public String asString() {
         final VTDNav selectionNavigation = navigation.cloneNav();
         try {
@@ -159,9 +142,6 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    /**
-     * @see XmlContext#asFormattedString()
-     */
     public String asFormattedString() {
         String toBeFormatted;
         try {
@@ -350,7 +330,6 @@ class VtdXmlParserContext implements XmlContext {
         elements.add(child);
         elements.addAll(childrenAndSiblings.siblings);
     }
-
 
     private static class ChildrenAndSiblings {
         private final List<String> children = new ArrayList<>();
