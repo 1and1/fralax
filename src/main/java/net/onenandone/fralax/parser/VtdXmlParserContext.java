@@ -282,14 +282,6 @@ class VtdXmlParserContext implements XmlContext {
         return childrenAndSiblings;
     }
 
-
-    /**
-     * @see this#traverse(int, int, List, boolean)
-     */
-    private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
-        traverse(rootDepth, startDepth, elements, true);
-    }
-
     private void traverse(final int rootDepth, final int startDepth, final List<String> elements, final boolean withNamespaces) throws NavException {
         int curIndex = navigation.getCurrentIndex();
         String child = "<";
