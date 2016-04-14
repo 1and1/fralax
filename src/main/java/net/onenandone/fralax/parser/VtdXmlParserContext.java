@@ -1,8 +1,8 @@
 package net.onenandone.fralax.parser;
 
 import com.ximpleware.*;
-import net.onenandone.fralax.XmlContext;
 import net.onenandone.fralax.FralaxException;
+import net.onenandone.fralax.XmlContext;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
@@ -11,10 +11,10 @@ import java.io.*;
 import java.util.*;
 
 /**
- * @author Daniel Draper Johann Bähler
- *         Created on 06.04.16.
+ * Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
+ *
+ * @author Daniel Draper Johann Böhler
  * @version 1.0
- *          Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
  */
 class VtdXmlParserContext implements XmlContext {
 
@@ -163,8 +163,10 @@ class VtdXmlParserContext implements XmlContext {
      * @see XmlContext#asFormattedString()
      */
     public String asFormattedString() {
+        String toBeFormatted;
         try {
-            final Source xmlInput = new StreamSource(new StringReader(asString()));
+            toBeFormatted = asStringWithoutNamespaces();
+            final Source xmlInput = new StreamSource(new StringReader(toBeFormatted));
             final StringWriter stringWriter = new StringWriter();
             final StreamResult xmlOutput = new StreamResult(stringWriter);
             final TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -180,21 +182,76 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     /**
+     * Returns the XML Element(s) without any namespace prefixes, e.g. instead of <x:books></x:books> this will return <books></books>.
+     * @return the XML string representation unformatted without name space prefixes.
+     */
+    private String asStringWithoutNamespaces() {
+        final VTDNav selectionNavigation = navigation.cloneNav();
+        try {
+            final int index = selectionNavigation.getCurrentIndex();
+            String curElement = "<" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "");
+            for (String attribute : evaluateAttributes(false)) {
+                curElement = curElement + " " + attribute;
+            }
+            curElement = curElement + ">";
+            String curOldElement = curElement;
+            final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth(), false);
+            for (final String childChild : childrenAndSiblings.children) {
+                curElement = curElement + childChild;
+            }
+            for (final String childSibling : childrenAndSiblings.siblings) {
+                curElement = curElement + childSibling;
+            }
+            if (curOldElement.equals(curElement)) {
+                selectionNavigation.recoverNode(index);
+                curElement = curElement + selectionNavigation.getXPathStringVal().replaceFirst("(.*):", "");
+            }
+            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "") + ">";
+
+            return curElement;
+        } catch (NavException e) {
+            throw new FralaxException("failed to transform to string", e);
+        }
+    }
+
+
+
+    private List<String> evaluateAttributes() throws NavException {
+        return evaluateAttributes(true);
+    }
+
+
+    /**
      * Used to get all Attributes of the Current Node.
      *
+     * @param withNamespaces to specify if namespaces are cut from attribute names (when false) or not (when true).
      * @return A List of all XMLAttributes in the current Node.
      * @throws NavException When an Error occurs navigating the attributes;
      */
-    private List<String> evaluateAttributes() throws NavException {
+    private List<String> evaluateAttributes(final boolean withNamespaces) throws NavException {
         final List<String> attributes = new ArrayList<>();
-        int attrCount = navigation.getAttrCount();
-        int curIndex = navigation.getCurrentIndex();
+        final int attrCount = navigation.getAttrCount();
+        final int curIndex = navigation.getCurrentIndex();
         for (int i = curIndex + 1; i < curIndex + 1 + attrCount * 2; i += 2) {
-            String attributeKey = navigation.toRawString(i);
-            String attributeValue = navigation.toRawString(i + 1);
+            String attributeKey;
+            if (withNamespaces) {
+                attributeKey = navigation.toNormalizedString(i);
+            }
+            else {
+                attributeKey = navigation.toNormalizedString(i).replaceFirst("(.*):", "");
+            }
+            final String attributeValue = navigation.toRawString(i + 1);
             attributes.add(attributeKey + "=\"" + attributeValue + "\"");
         }
         return attributes;
+    }
+
+
+    /**
+     * @see this#evaluateChildrenAndSiblings(int, int, int, boolean)
+     */
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
+        return evaluateChildrenAndSiblings(rootDepth, parentIndex, startDepth, true);
     }
 
 
@@ -205,16 +262,27 @@ class VtdXmlParserContext implements XmlContext {
      * @param rootDepth   the rootDepth index we start the search from.
      * @param parentIndex the parent Index of the current search.
      * @param startDepth  the startDepth of the current iteration.
+     * @param withNamespaces to specify if namespaces are cut from all names (when false) or not (when true).
      * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
      * @throws NavException Error that occurs when the traversing of Nodes fails.
      */
-    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth, boolean withNamespaces) throws NavException {
         ChildrenAndSiblings childrenAndSiblings = new ChildrenAndSiblings();
         //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
-            traverse(rootDepth, startDepth, childrenAndSiblings.children);
+            if (withNamespaces) {
+                traverse(rootDepth, startDepth, childrenAndSiblings.children, true);
+            }
+            else {
+                traverse(rootDepth, startDepth, childrenAndSiblings.children, false);
+            }
         } else {
-            childrenAndSiblings.children.add(navigation.getXPathStringVal());
+            if (withNamespaces) {
+                childrenAndSiblings.children.add(navigation.getXPathStringVal());
+            }
+            else {
+                childrenAndSiblings.children.add(navigation.getXPathStringVal().replaceFirst("(.*):", ""));
+            }
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
@@ -223,27 +291,66 @@ class VtdXmlParserContext implements XmlContext {
         final int newStartDepth = startDepth - 1;
         //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
         if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
-            traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings);
+            if (withNamespaces) {
+                traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings, true);
+            }
+            else {
+                traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings, false);
+            }
+
         }
         return childrenAndSiblings;
     }
 
+
+    /**
+     * @see this#traverse(int, int, List, boolean)
+     */
     private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
+        traverse(rootDepth, startDepth, elements, true);
+    }
+
+    private void traverse(final int rootDepth, final int startDepth, final List<String> elements, final boolean withNamespaces) throws NavException {
         int curIndex = navigation.getCurrentIndex();
         String child = "<";
-        child = child + navigation.toNormalizedString(curIndex);
-        for (final String attribute : evaluateAttributes()) {
-            child = child + " " + attribute;
+        if (withNamespaces) {
+            child = child + navigation.toNormalizedString(curIndex);
         }
+        else {
+            child = child + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "");
+        }
+        if (withNamespaces) {
+            for (final String attribute : evaluateAttributes()) {
+                child = child + " " + attribute;
+            }
+        }
+        else {
+            for (final String attribute : evaluateAttributes(false)) {
+                child = child + " " + attribute;
+            }
+        }
+
         child = child + ">";
-        final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+        ChildrenAndSiblings childrenAndSiblings;
+        if (withNamespaces) {
+            childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+        }
+        else {
+            childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1, false);
+        }
         for (final String childChild : childrenAndSiblings.children) {
             child = child + childChild;
         }
-        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+        if (withNamespaces) {
+            child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+        }
+        else {
+            child = child + "</" + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "") + ">";
+        }
         elements.add(child);
         elements.addAll(childrenAndSiblings.siblings);
     }
+
 
     private static class ChildrenAndSiblings {
         private final List<String> children = new ArrayList<>();

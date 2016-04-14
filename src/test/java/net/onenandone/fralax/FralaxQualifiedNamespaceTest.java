@@ -1,7 +1,6 @@
 package net.onenandone.fralax;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -17,6 +16,28 @@ public class FralaxQualifiedNamespaceTest {
     public void setUp() throws Exception {
         xml = Fralax.parse(FralaxTest.class.getResource("/books-qualified.xml").getFile());
         xml.registerNamespace("b", "urn:books:qualified");
+    }
+
+    @Test
+    public void setNoSelectToString() throws  Exception {
+        String s = xml.asFormattedString();
+        assertEquals("<books>\n" +
+        "  <book id=\"bk001\">\n" +
+        "    <author>Writer</author>\n" +
+        "    <title>The First Book</title>\n" +
+        "    <genre>Fiction</genre>\n" +
+        "    <price>44.95</price>\n" +
+        "    <pub_date>2000-10-01</pub_date>\n" +
+        "    <review>An amazing story of nothing.</review>\n" +
+        "  </book>\n" +
+        "  <book id=\"bk002\">\n" +
+        "    <author>Poet</author>\n" +
+        "    <title>The Poet's First Poem</title>\n" +
+                "    <genre>Poem</genre>\n" +
+        "    <price>24.95</price>\n" +
+        "    <review>Least poetic poems.</review>\n" +
+        "  </book>\n" +
+        "</books>\n", s);
     }
 
     @Test
@@ -96,8 +117,7 @@ public class FralaxQualifiedNamespaceTest {
         );
     }
 
-    // TODO this test fails, as the transformer is not able to identify the namespace declaration and therefore can't format the snippet
-    @Test @Ignore
+    @Test
     public void testElementToFormattedString() throws Exception {
         final Optional<XmlContext> optionalContext = xml.select("/b:books/b:book[1]");
         assertNotNull(optionalContext);
