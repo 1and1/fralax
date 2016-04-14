@@ -11,4 +11,4 @@ before_script:
 script: gradle test jacocoTestReport --info
 
 after_script:
-  - codacy-coverage-reporter -l Java -r coverage.xml
+  - /home/travis/jpm/bin/codacy-coverage-reporter -l Java -r coverage.xml
