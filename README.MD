@@ -17,7 +17,7 @@ See [XmlContext](src/main/java/net/onenandone/fralax/XmlContext.java) and [Frala
 This section describes some points about contribution process for the fralax package.
 The project is being developed by the community. Maintainer merges pull-requests, fixes critical bugs, etc.
 
-If you fixed or added something useful to the project, you can send pull-request. It will be reviewed and accepted, commented for rework, or declined by at least two [maintainers](https://github.com/1and1/fralax/blob/master/MAINTAINERS).
+If you fixed or added something useful to the project, you can send pull-request. It will be reviewed and accepted, or commented for rework by at least two [maintainers](https://github.com/1and1/fralax/blob/master/MAINTAINERS). Pull-requests are declined if a maintainer closes the request. 
 
 We are using [LGTM](https://lgtm.co) to approve pull-request. The pull-request is only accepted if two maintainers comment with ["LGTM"](https://lgtm.co) or "+1".
 
