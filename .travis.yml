@@ -6,7 +6,7 @@ os:
 
 before_script:
   - curl https://www.jpm4j.org/install/script | sh
-  - jpm install com.codacy:codacy-coverage-reporter:assembly
+  - /home/travis/jpm/bin/jpm install com.codacy:codacy-coverage-reporter:assembly
 
 script: gradle test jacocoTestReport --info
 
