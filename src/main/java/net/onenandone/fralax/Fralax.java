@@ -5,11 +5,11 @@ import net.onenandone.fralax.parser.VtdXmlParser;
 import java.util.Objects;
 
 /**
+ * Factory used to create the default (Vtd) XMLParser or a specific parser.
+ * Requirement for the static factory function to work for new Implementations: Default constructor must be visible.
+ *
  * @author Daniel Draper Johann Bähler
- *         Created on 06.04.16.
  * @version 1.0
- *          Factory used to create the default (Vtd) XMLParser or a specific parser.
- *          Requirement for the static factory function to work for new Implementations: Default constructor must be visible.
  */
 public class Fralax {
 

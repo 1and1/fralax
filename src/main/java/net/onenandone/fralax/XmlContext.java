@@ -4,19 +4,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * Represents a parsed XmlFile or result of an executed XPath-Query.
+ *
  * @author Daniel Draper Johann Böhler
- *         Created on 06.04.16.
  * @version 1.0
- *          Represents a parsed XmlFile or result of an executed XPath-Query.
  */
 public interface XmlContext {
 
     /**
      * Registers a namespace with this certain xml document for use when evaluating xpath requests.
-     * E.g. <code>XmlContext xml = Fralax.parse(fileToParse)
-     * xml.registerNamespace("ns", "http://www.google.com")
-     * xml.select("//ns:element") //now uses the namespace
-     * </code>
+     * E.g.
+     *
+     * XmlContext xml = Fralax.parse(fileToParse);
+     * xml.registerNamespace("ns", "http://www.google.com");
+     * xml.select("//ns:element"); //now uses the namespace
+     * }
+     * </pre>
      *
      * @param key   the key to register for the namespace.
      * @param value namespace value to register.
@@ -25,10 +28,14 @@ public interface XmlContext {
 
     /**
      * Searches for an XPathQuery and returns the result as an XmlContext if it exists{@link Optional#empty()} otherwise.
-     * E.g. <code>XmlContext xml = Fralax.parse(fileToParse)
-     * XmlContext objectRR1 = xml.select("//vehicle[@id='RR1']") //returns new XmlContext
-     * objectRR1.select("/vehicle-id") //returns the vehicle-id object only for the previously selected vehicle object
-     * </code>
+     * E.g.
+     * <pre>
+     * {@code
+     * XmlContext xml = Fralax.parse(fileToParse);
+     * XmlContext objectRR1 = xml.select("//vehicle[@id='RR1']"); //returns new XmlContext
+     * objectRR1.select("/vehicle-id"); //returns the vehicle-id object only for the previously selected vehicle object
+     * }
+     * </pre>
      *
      * @param xpath the xpath query to search for.
      * @return a new XmlContext that can be parsed using xpath again.
@@ -38,10 +45,14 @@ public interface XmlContext {
 
     /**
      * Searches for an XPathQuery and returns the result as a list of XmlContexts that again are parsable with xpath.
-     * E.g. <code>XmlContext xml = Fralax.parse(fileToParse)
-     * List\<XmlContext> vehicles = xml.selectAll("//vehicle") //returns new list of vehicles as parsed XmlContexts.
-     * vehicles.get(0).select("/vehicle-id") //returns the vehicle-id object only for the first element of the previously selected vehicles.
-     * </code>
+     * E.g.
+     * <pre>
+     * {@code
+     * XmlContext xml = Fralax.parse(fileToParse);
+     * List\<XmlContext> vehicles = xml.selectAll("//vehicle"); //returns new list of vehicles as parsed XmlContexts.
+     * vehicles.get(0).select("/vehicle-id"); //returns the vehicle-id object only for the first element of the previously selected vehicles.
+     * }
+     * </pre>
      *
      * @param xpath the xpath query to search for.
      * @return a new XmlContext that can be parsed using xpath again.
