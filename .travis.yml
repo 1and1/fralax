@@ -1,6 +1,14 @@
 language: java
-script: gradle test --info
 jdk:
   - oraclejdk8
 os:
   - linux
+
+before_script:
+  - curl https://www.jpm4j.org/install/script | sh
+  - jpm install com.codacy:codacy-coverage-reporter:assembly
+
+script: gradle test jacocoTestReport --info
+
+after_script:
+  - codacy-coverage-reporter -l Java -r coverage.xml

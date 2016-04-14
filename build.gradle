@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'jacoco'
 
 group 'net.oneandone'
 version '0.0.1'
@@ -17,4 +18,17 @@ dependencies {
     compile 'com.ximpleware:vtd-xml:2.11'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
     testCompile 'junit:junit:4.12'
+}
+
+test {
+    jacoco {
+        enabled = true
+    }
+}
+
+jacocoTestReport {
+    reports.xml {
+        enabled = true
+        destination = "${buildDir}/jacoco/coverage.xml"
+    }
 }
