@@ -4,9 +4,6 @@ import com.ximpleware.*;
 import net.onenandone.fralax.FralaxException;
 import net.onenandone.fralax.XmlContext;
 
-import javax.xml.transform.*;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
 
@@ -145,24 +142,6 @@ class VtdXmlParserContext implements XmlContext {
             return curElement;
         } catch (NavException e) {
             throw new FralaxException("failed to transform to string", e);
-        }
-    }
-
-    @Override
-    public String asFormattedString() {
-        try {
-            final Source xmlInput = new StreamSource(new StringReader(asString()));
-            final StringWriter stringWriter = new StringWriter();
-            final StreamResult xmlOutput = new StreamResult(stringWriter);
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute("indent-number", 2);
-            final Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.transform(xmlInput, xmlOutput);
-            return xmlOutput.getWriter().toString();
-        } catch (final TransformerException e) {
-            throw new FralaxException("could not format string", e);
         }
     }
 

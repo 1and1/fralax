@@ -39,7 +39,7 @@ public class FralaxQualifiedNamespaceTest {
                 "        <x:review>Least poetic poems.</x:review>\n" +
                 "    </x:book>\n" +
                 "</x:books>\n",
-                xml.asFormattedString()
+                xml.asString(true)
         );
     }
 
@@ -133,7 +133,7 @@ public class FralaxQualifiedNamespaceTest {
                         "  <pub_date>2000-10-01</pub_date>\n" +
                         "  <review>An amazing story of nothing.</review>\n" +
                         "</book>\n",
-                optionalContext.get().asFormattedString()
+                optionalContext.get().asString(true)
         );
     }
 
@@ -141,8 +141,8 @@ public class FralaxQualifiedNamespaceTest {
     public void testSelectListOfAttributes() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//@id");
         assertEquals(2, contexts.size());
-        assertEquals("bk001", contexts.get(0).asFormattedString());
-        assertEquals("bk002", contexts.get(1).asFormattedString());
+        assertEquals("bk001", contexts.get(0).asString(true));
+        assertEquals("bk002", contexts.get(1).asString(true));
     }
 
     @Test(expected = FralaxException.class)
