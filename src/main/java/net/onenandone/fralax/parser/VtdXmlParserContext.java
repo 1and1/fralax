@@ -30,37 +30,26 @@ class VtdXmlParserContext implements XmlContext {
      * @throws IOException    thrown when an error occurs while opening the file.
      * @throws ParseException thrown when an error occurs during parsing of the xml file.
      */
-    VtdXmlParserContext(String file) throws IOException, ParseException {
-        File fileToParse = new File(file);
-        FileInputStream fileInputStream = new FileInputStream(fileToParse);
-        byte[] xmlByteArray = new byte[(int) fileToParse.length()];
-        if (fileInputStream.read(xmlByteArray) != xmlByteArray.length) {
-            throw new IOException("Error when reading the XML File");
+    VtdXmlParserContext(final String file) throws IOException, ParseException {
+        final File fileToParse = new File(file);
+        try (final FileInputStream fileInputStream = new FileInputStream(fileToParse)) {
+            byte[] xmlByteArray = new byte[(int) fileToParse.length()];
+            if (fileInputStream.read(xmlByteArray) != xmlByteArray.length) {
+                throw new IOException("Error when reading the XML File");
+            }
+            final VTDGen vtdGen = new VTDGen();
+            vtdGen.setDoc(xmlByteArray);
+            vtdGen.parse(true); // set namespace awareness to true
+            navigation = vtdGen.getNav();
+            autopilot = new AutoPilot(navigation);
         }
-        final VTDGen vtdGen = new VTDGen();
-        vtdGen.setDoc(xmlByteArray);
-        vtdGen.parse(true); // set namespace awareness to true
-        navigation = vtdGen.getNav();
-        autopilot = new AutoPilot(navigation);
     }
 
-    /**
-     * Private Constructor used to create new contexts from the result of an earlier XPathQuery by passing it as its byte value and reapplying the VTD-XML-Parser.
-     *
-     * @param xmlObjectAsByteArray XmlObject to parse as a byte array.
-     * @param registeredNamespaces Namespaces to use for the creation, as we have to set the same namespaces as were used in the earlier XPathSearch.
-     * @throws ParseException when an error occurs parsing the input object.
-     */
-    private VtdXmlParserContext(byte[] xmlObjectAsByteArray, Map<String, String> registeredNamespaces) throws ParseException {
+    private VtdXmlParserContext(final AutoPilot autopilot, final VTDNav navigation, final Map<String, String> registeredNamespaces) {
+        this.autopilot = autopilot;
+        this.navigation = navigation;
         this.registeredNamespaces = registeredNamespaces;
-        addNamespacesToAutopilot();
-        final VTDGen vtdGen = new VTDGen();
-        vtdGen.setDoc(xmlObjectAsByteArray);
-        vtdGen.parse(true); // set namespace awareness to true
-        navigation = vtdGen.getNav();
-        autopilot = new AutoPilot(navigation);
     }
-
 
     @Override
     /**
@@ -68,14 +57,14 @@ class VtdXmlParserContext implements XmlContext {
      */
     public void registerNamespace(String key, String value) {
         registeredNamespaces.put(key, value);
-        addNamespacesToAutopilot();
+        addNamespacesToAutopilot(autopilot, registeredNamespaces);
     }
 
 
     /**
      * Adds all registered Namespaces to the Autopilot for evaluation.
      */
-    private void addNamespacesToAutopilot() {
+    private static void addNamespacesToAutopilot(final AutoPilot autopilot, final Map<String, String> registeredNamespaces) {
         for (Map.Entry<String, String> entry : registeredNamespaces.entrySet()) {
             autopilot.declareXPathNameSpace(entry.getKey(), entry.getValue());
         }
@@ -86,12 +75,7 @@ class VtdXmlParserContext implements XmlContext {
      * @see XmlContext#select(String)
      */
     public Optional<XmlContext> select(String xpath) throws FralaxException {
-        try {
-            autopilot.selectXPath(xpath);
-        } catch (XPathParseException e) {
-            throw new FralaxException("Xpath can not be selected from Parser", e);
-        }
-        List<XmlContext> result = selectAll(xpath);
+        final List<XmlContext> result = selectAll(xpath);
         if (result.size() > 1) {
             throw new FralaxException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
         } else if (result.size() == 1) {
@@ -106,47 +90,28 @@ class VtdXmlParserContext implements XmlContext {
      * @see XmlContext#selectAll(String)
      */
     public List<XmlContext> selectAll(String xpath) throws FralaxException {
-        List<XmlContext> xmlElements = new ArrayList<>();
+        final List<XmlContext> xmlElements = new ArrayList<>();
+
+        final VTDNav selectionNavigation = navigation.cloneNav();
+        final AutoPilot selectionAutoPilot = new AutoPilot(selectionNavigation);
+        addNamespacesToAutopilot(selectionAutoPilot, registeredNamespaces);
+
         try {
-            autopilot.selectXPath(xpath);
-        } catch (XPathParseException e) {
-            throw new FralaxException("Xpath can not be selected from Parser", e);
-        }
-        try {
-            List<String> selectionAsStrings = new ArrayList<>();
-            int xpathResultIndex = autopilot.evalXPath();
+            selectionAutoPilot.selectXPath(xpath);
+
+            int xpathResultIndex = selectionAutoPilot.evalXPath();
             while (xpathResultIndex != -1) {
                 //Take into account searches for Attribute/Value of an Element
-                if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_CHARACTER_DATA) {
-                    xmlElements.add(new ValueContext(navigation.toNormalizedString(xpathResultIndex)));
-                } else if (navigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_ATTR_NAME) {
-                    xmlElements.add(new ValueContext(navigation.toNormalizedString(xpathResultIndex + 1)));
+                if (selectionNavigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_CHARACTER_DATA) {
+                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex)));
+                } else if (selectionNavigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_ATTR_NAME) {
+                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex + 1)));
                 } else {
-                    String curElement = "<" + navigation.toNormalizedString(xpathResultIndex);
-                    for (String attribute : evaluateAttributes()) {
-                        curElement = curElement + " " + attribute;
-                    }
-                    curElement = curElement + ">";
-                    String curOldElement = curElement;
-                    List<List<String>> childrenAndSiblings = evaluateChildrenAndSiblings(navigation.getCurrentDepth(), xpathResultIndex, navigation.getCurrentDepth());
-                    for (String childChild : childrenAndSiblings.get(0)) {
-                        curElement = curElement + childChild;
-                    }
-                    for (String childSibling : childrenAndSiblings.get(1)) {
-                        curElement = curElement + childSibling;
-                    }
-                    if (curOldElement.equals(curElement)) {
-                        navigation.recoverNode(xpathResultIndex);
-                        curElement = curElement + navigation.getXPathStringVal();
-                    }
-                    curElement = curElement + "</" + navigation.toNormalizedString(xpathResultIndex) + ">";
-                    selectionAsStrings.add(curElement);
-                    navigation.recoverNode(xpathResultIndex);
+                    final VTDNav clonedNavigation = selectionNavigation.cloneNav();
+                    final AutoPilot clonedAutoPilot = new AutoPilot(clonedNavigation);
+                    xmlElements.add(new VtdXmlParserContext(clonedAutoPilot, clonedNavigation, registeredNamespaces));
                 }
-                xpathResultIndex = autopilot.evalXPath();
-            }
-            for (String s : selectionAsStrings) {
-                xmlElements.add(new VtdXmlParserContext(s.getBytes(), registeredNamespaces));
+                xpathResultIndex = selectionAutoPilot.evalXPath();
             }
             return xmlElements;
         } catch (XPathEvalException | NavException e) {
@@ -155,8 +120,8 @@ class VtdXmlParserContext implements XmlContext {
             } else {
                 throw new FralaxException("Error when navigating through XPathResults", e);
             }
-        } catch (ParseException e) {
-            throw new FralaxException("Error when parsing result of XPathSearch", e);
+        } catch (XPathParseException e) {
+            throw new FralaxException("Xpath can not be selected from Parser", e);
         }
     }
 
@@ -165,13 +130,32 @@ class VtdXmlParserContext implements XmlContext {
      * @see XmlContext#asString()
      */
     public String asString() {
-        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        final VTDNav selectionNavigation = navigation.cloneNav();
         try {
-            navigation.dumpXML(byteOutputStream);
-        } catch (IOException e) {
-            throw new FralaxException("failed to dump xml state", e);
+            final int index = selectionNavigation.getCurrentIndex();
+            String curElement = "<" + selectionNavigation.toNormalizedString(index);
+            for (String attribute : evaluateAttributes()) {
+                curElement = curElement + " " + attribute;
+            }
+            curElement = curElement + ">";
+            String curOldElement = curElement;
+            final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
+            for (final String childChild : childrenAndSiblings.children) {
+                curElement = curElement + childChild;
+            }
+            for (final String childSibling : childrenAndSiblings.siblings) {
+                curElement = curElement + childSibling;
+            }
+            if (curOldElement.equals(curElement)) {
+                selectionNavigation.recoverNode(index);
+                curElement = curElement + selectionNavigation.getXPathStringVal();
+            }
+            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index) + ">";
+
+            return curElement;
+        } catch (NavException e) {
+            throw new FralaxException("failed to transform to string", e);
         }
-        return byteOutputStream.toString();
     }
 
     @Override
@@ -224,54 +208,46 @@ class VtdXmlParserContext implements XmlContext {
      * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
      * @throws NavException Error that occurs when the traversing of Nodes fails.
      */
-    private List<List<String>> evaluateChildrenAndSiblings(int rootDepth, int parentIndex, int startDepth) throws NavException {
-        List<String> children = new ArrayList<>();
-        List<String> siblings = new ArrayList<>();
-        List<List<String>> result = new ArrayList<>();
-        result.add(children);
-        result.add(siblings);
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
+        ChildrenAndSiblings childrenAndSiblings = new ChildrenAndSiblings();
         //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
-            int curIndex = navigation.getCurrentIndex();
-            String child = "<";
-            child = child + navigation.toNormalizedString(curIndex);
-            for (String attribute : evaluateAttributes()) {
-                child = child + " " + attribute;
-            }
-            child = child + ">";
-            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
-            for (String childChild : newChildren.get(0)) {
-                child = child + childChild;
-            }
-            child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
-            children.add(child);
-            children.addAll(newChildren.get(1));
+            traverse(rootDepth, startDepth, childrenAndSiblings.children);
         } else {
-            children.add(navigation.getXPathStringVal());
+            childrenAndSiblings.children.add(navigation.getXPathStringVal());
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
         navigation.recoverNode(parentIndex);
         //Assignment so the next sibling traversal uses correct depth to determine if we should search for more children.
-        startDepth--;
+        final int newStartDepth = startDepth - 1;
         //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
         if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
-            int curIndex = navigation.getCurrentIndex();
-            String sibling = "<";
-            sibling = sibling + navigation.toNormalizedString(curIndex);
-            for (String attribute : evaluateAttributes()) {
-                sibling = sibling + " " + attribute;
-            }
-            sibling = sibling + ">";
-            List<List<String>> newChildren = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
-            for (String childChild : newChildren.get(0)) {
-                sibling = sibling + childChild;
-            }
-            sibling = sibling + "</" + navigation.toNormalizedString(curIndex) + ">";
-            siblings.add(sibling);
-            siblings.addAll(newChildren.get(1));
+            traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings);
         }
-        return result;
+        return childrenAndSiblings;
+    }
+
+    private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
+        int curIndex = navigation.getCurrentIndex();
+        String child = "<";
+        child = child + navigation.toNormalizedString(curIndex);
+        for (final String attribute : evaluateAttributes()) {
+            child = child + " " + attribute;
+        }
+        child = child + ">";
+        final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+        for (final String childChild : childrenAndSiblings.children) {
+            child = child + childChild;
+        }
+        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+        elements.add(child);
+        elements.addAll(childrenAndSiblings.siblings);
+    }
+
+    private static class ChildrenAndSiblings {
+        private final List<String> children = new ArrayList<>();
+        private final List<String> siblings = new ArrayList<>();
     }
 
 }

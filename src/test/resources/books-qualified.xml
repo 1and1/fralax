@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<x:books xmlns:x="urn:books:qualified">
+    <x:book id="bk001">
+        <x:author>Writer</x:author>
+        <x:title>The First Book</x:title>
+        <x:genre>Fiction</x:genre>
+        <x:price>44.95</x:price>
+        <x:pub_date>2000-10-01</x:pub_date>
+        <x:review>An amazing story of nothing.</x:review>
+    </x:book>
+
+    <x:book id="bk002">
+        <x:author>Poet</x:author>
+        <x:title>The Poet's First Poem</x:title>
+        <x:genre>Poem</x:genre>
+        <x:price>24.95</x:price>
+        <x:review>Least poetic poems.</x:review>
+    </x:book>
+</x:books>
