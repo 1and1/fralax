@@ -19,26 +19,26 @@ public class FralaxQualifiedNamespaceTest {
     }
 
     @Test
-    public void setNoSelectToString() throws  Exception {
+    public void setNoSelectToString() throws Exception {
         assertEquals(
                 "<x:books xmlns:x=\"urn:books:qualified\">\n" +
-                "    <x:book id=\"bk001\">\n" +
-                "        <x:author>Writer</x:author>\n" +
-                "        <x:title>The First Book</x:title>\n" +
-                "        <x:genre>Fiction</x:genre>\n" +
-                "        <x:price>44.95</x:price>\n" +
-                "        <x:pub_date>2000-10-01</x:pub_date>\n" +
-                "        <x:review>An amazing story of nothing.</x:review>\n" +
-                "    </x:book>\n" +
-                "\n" +
-                "    <x:book id=\"bk002\">\n" +
-                "        <x:author>Poet</x:author>\n" +
-                "        <x:title>The Poet's First Poem</x:title>\n" +
-                "        <x:genre>Poem</x:genre>\n" +
-                "        <x:price>24.95</x:price>\n" +
-                "        <x:review>Least poetic poems.</x:review>\n" +
-                "    </x:book>\n" +
-                "</x:books>\n",
+                        "    <x:book id=\"bk001\">\n" +
+                        "        <x:author>Writer</x:author>\n" +
+                        "        <x:title>The First Book</x:title>\n" +
+                        "        <x:genre>Fiction</x:genre>\n" +
+                        "        <x:price>44.95</x:price>\n" +
+                        "        <x:pub_date>2000-10-01</x:pub_date>\n" +
+                        "        <x:review>An amazing story of nothing.</x:review>\n" +
+                        "    </x:book>\n" +
+                        "\n" +
+                        "    <x:book id=\"bk002\">\n" +
+                        "        <x:author>Poet</x:author>\n" +
+                        "        <x:title>The Poet's First Poem</x:title>\n" +
+                        "        <x:genre>Poem</x:genre>\n" +
+                        "        <x:price>24.95</x:price>\n" +
+                        "        <x:review>Least poetic poems.</x:review>\n" +
+                        "    </x:book>\n" +
+                        "</x:books>\n",
                 xml.asString(true)
         );
     }
@@ -149,6 +149,22 @@ public class FralaxQualifiedNamespaceTest {
     public void testSelectBinaryExpression() throws Exception {
         xml.selectAll("@id='RR1'");
     }
+
+    @Test
+    public void testSelectMutiple() throws Exception {
+        final List<XmlContext> contexts = xml.selectAll("//b:author | //b:title");
+        assertFalse(contexts.isEmpty());
+        assertEquals("<author>Writer</author>\n",
+                contexts.get(0).asString(true));
+        assertEquals("<author>Poet</author>\n",
+                contexts.get(1).asString(true));
+        assertEquals("<title>The First Book</title>\n",
+                contexts.get(2).asString(true));
+        assertEquals("<title>The Poet's First Poem</title>\n",
+                contexts.get(3).asString(true));
+
+    }
+
 
 }
 
