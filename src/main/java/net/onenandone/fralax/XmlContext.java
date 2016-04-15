@@ -1,5 +1,10 @@
 package net.onenandone.fralax;
 
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,9 +70,29 @@ public interface XmlContext {
     String asString();
 
     /**
-     * Returns object correctly indented and with correct line-breaks. Same appearance as original xml.
+     * Returns object as unformatted String if {@code formatted} is set to {@code false} ({@link #asString()})
+     * or the object correctly indented and with correct line-breaks otherwise.
      *
-     * @return object as formatted String.
+     * @param formatted boolean flag indicating if output should be formatted
+     * @return object as String.
      */
-    String asFormattedString();
+    default String asString(final boolean formatted) {
+        if (formatted) {
+            try {
+                final Source xmlInput = new StreamSource(new StringReader(asString()));
+                final StringWriter stringWriter = new StringWriter();
+                final StreamResult xmlOutput = new StreamResult(stringWriter);
+                final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                transformerFactory.setAttribute("indent-number", 2);
+                final Transformer transformer = transformerFactory.newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                transformer.transform(xmlInput, xmlOutput);
+                return xmlOutput.getWriter().toString();
+            } catch (final TransformerException e) {
+                throw new FralaxException("could not format string", e);
+            }
+        }
+        return asString();
+    }
 }

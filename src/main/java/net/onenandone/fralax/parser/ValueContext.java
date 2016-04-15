@@ -48,7 +48,7 @@ class ValueContext implements XmlContext {
     }
 
     @Override
-    public String asFormattedString() {
+    public String asString(final boolean formatted) {
         return value;
     }
 }
