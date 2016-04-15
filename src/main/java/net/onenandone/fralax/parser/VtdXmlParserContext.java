@@ -38,6 +38,14 @@ class VtdXmlParserContext implements XmlContext {
         }
     }
 
+    /**
+     * Constructor used to create a newly parsed XMLContext from an XPath Result. takes a freshly created Autopilot
+     * and navigation in which the result is embedded.
+     *
+     * @param autopilot autopilot for the specified navigation.
+     * @param navigation navigation to navigate through the xpath result.
+     * @param registeredNamespaces namespaces to register for the new xml context.
+     */
     private VtdXmlParserContext(final AutoPilot autopilot, final VTDNav navigation, final Map<String, String> registeredNamespaces) {
         this.autopilot = autopilot;
         this.navigation = navigation;
@@ -193,6 +201,15 @@ class VtdXmlParserContext implements XmlContext {
         return childrenAndSiblings;
     }
 
+    /**
+     * Traverses all child and its sibling elements for a certain element. Uses a DFS approach: go to deepest
+     * element as long as possible, then resolve the children.
+     *
+     * @param rootDepth the depth of the root element of this context.
+     * @param startDepth the depth we started our search on (so the depth of the first result for the xpath).
+     * @param elements the elements to fill.
+     * @throws NavException thrown when an error occurs navigating through the context.
+     */
     private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
         int curIndex = navigation.getCurrentIndex();
         String child = "<";
@@ -211,6 +228,9 @@ class VtdXmlParserContext implements XmlContext {
         elements.addAll(childrenAndSiblings.siblings);
     }
 
+    /**
+     * Class encapsulating two arrayLists, one for children of an xml element one for siblings of the element at the same depth.
+     */
     private static class ChildrenAndSiblings {
         private final List<String> children = new ArrayList<>();
         private final List<String> siblings = new ArrayList<>();
