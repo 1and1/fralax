@@ -1,6 +1,7 @@
 package net.onenandone.fralax;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -124,5 +125,14 @@ public class FralaxTest {
     @Test(expected = FralaxException.class)
     public void testSelectBinaryExpression() throws Exception {
         xml.selectAll("@id='RR1'");
+    }
+
+    @Test @Ignore
+    //TODO: Test
+    public void testWatcherService() throws Exception {
+       /* while (true) {
+            System.out.println(Fralax.fileWatcher.isValid());
+            Thread.sleep(500);
+        }*/
     }
 }

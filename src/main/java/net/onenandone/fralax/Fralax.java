@@ -11,6 +11,8 @@ import java.util.Objects;
 @SuppressWarnings("WeakerAccess")
 public class Fralax {
 
+    public static FileWatcherThread fileWatcher;
+
     /**
      * @param file file to parse.
      * @return a new searchable XmlContext of the contents of the file if parsing was successful.
@@ -32,6 +34,8 @@ public class Fralax {
     public static XmlContext parse(final String file, final Class<? extends XmlParser> xmlParserClass) {
         Objects.requireNonNull(file, "the xml file may not be null");
         Objects.requireNonNull(xmlParserClass, "the xml parser class may not be null");
+        fileWatcher= new FileWatcherThread(file);
+        fileWatcher.start();
         try {
             final XmlParser xmlParser = xmlParserClass.newInstance();
             return xmlParser.parse(file);
@@ -40,4 +44,8 @@ public class Fralax {
         }
     }
 
+    public static void main(String[] args) {
+        System.out.println("../resources/abc/de/xdfsada.books-qualified.xml".replaceFirst("/(.[^/]*)\\.xml", ""));
+        System.out.println("../resources/abd.def".replaceFirst("/([^./]*)\\.([^/.]*)", ""));
+    }
 }

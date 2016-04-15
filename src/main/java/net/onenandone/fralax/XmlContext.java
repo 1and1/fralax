@@ -13,6 +13,10 @@ import java.util.Optional;
  */
 public interface XmlContext {
 
+    default boolean isValid() {
+        return Fralax.fileWatcher != null && Fralax.fileWatcher.isValid();
+    }
+
     /**
      * Registers a namespace with this certain xml document for use when evaluating xpath requests.
      * E.g.
