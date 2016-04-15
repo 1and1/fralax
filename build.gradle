@@ -49,9 +49,28 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-signing {
-    sign configurations.archives
+if (hasProperty('signing.keyId') && hasProperty('signing.password') && hasProperty('signing.secretKeyRingFile')) {
+    signing {
+        sign configurations.archives
+    }
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+// Version of artifact as defined by the task graph
+// --------------------------------------------------------------------------------------------------------------------
+gradle.taskGraph.whenReady {taskGraph ->
+    if ("${version}".matches("[0-9]+\\.[0-9]+\\-SNAPSHOT") && (taskGraph.hasTask(':buildRpm') || taskGraph.hasTask(':buildDeb') || taskGraph.hasTask(':release'))) {
+        def gitRevision = 'git rev-list HEAD --count'.execute().text.trim()
+        version = "${version}".replace('-SNAPSHOT', '') + ".${gitRevision}"
+
+        configurations.testCompile.dependencies.each { dependency ->
+            if (dependency.version.contains("SNAPSHOT")) {
+                throw new RuntimeException("project contains SNAPSHOT dependency in artifact ${dependency.group}:${dependency.name}:${dependency.version}")
+            }
+        }
+    }
+}
+
 // --------------------------------------------------------------------------------------------------------------------
 // Release tasks to 'The Central Repository'
 // --------------------------------------------------------------------------------------------------------------------
