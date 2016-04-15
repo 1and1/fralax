@@ -1,12 +1,9 @@
 package net.onenandone.fralax.parser;
 
 import com.ximpleware.*;
-import net.onenandone.fralax.XmlContext;
 import net.onenandone.fralax.FralaxException;
+import net.onenandone.fralax.XmlContext;
 
-import javax.xml.transform.*;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
 
@@ -18,7 +15,6 @@ class VtdXmlParserContext implements XmlContext {
     private AutoPilot autopilot;
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
-
 
     /**
      * Default constructor used to create a newly parsed XMLContext from a certain file.
@@ -53,7 +49,6 @@ class VtdXmlParserContext implements XmlContext {
         registeredNamespaces.put(key, value);
         addNamespacesToAutopilot(autopilot, registeredNamespaces);
     }
-
 
     /** Adds all registered Namespaces to the Autopilot for evaluation. */
     private static void addNamespacesToAutopilot(final AutoPilot autopilot, final Map<String, String> registeredNamespaces) {
@@ -114,9 +109,18 @@ class VtdXmlParserContext implements XmlContext {
     @Override
     public String asString() {
         final VTDNav selectionNavigation = navigation.cloneNav();
+        if (selectionNavigation.getCurrentIndex() == selectionNavigation.getRootIndex()) {
+            try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                selectionNavigation.dumpXML(outputStream);
+                return outputStream.toString();
+            } catch (final IOException e) {
+                // try to create string otherwise
+            }
+        }
+
         try {
             final int index = selectionNavigation.getCurrentIndex();
-            String curElement = "<" + selectionNavigation.toNormalizedString(index);
+            String curElement = "<" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "");
             for (String attribute : evaluateAttributes()) {
                 curElement = curElement + " " + attribute;
             }
@@ -131,31 +135,13 @@ class VtdXmlParserContext implements XmlContext {
             }
             if (curOldElement.equals(curElement)) {
                 selectionNavigation.recoverNode(index);
-                curElement = curElement + selectionNavigation.getXPathStringVal();
+                curElement = curElement + selectionNavigation.getXPathStringVal().replaceFirst("(.*):", "");
             }
-            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index) + ">";
+            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "") + ">";
 
             return curElement;
         } catch (NavException e) {
             throw new FralaxException("failed to transform to string", e);
-        }
-    }
-
-    @Override
-    public String asFormattedString() {
-        try {
-            final Source xmlInput = new StreamSource(new StringReader(asString()));
-            final StringWriter stringWriter = new StringWriter();
-            final StreamResult xmlOutput = new StreamResult(stringWriter);
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute("indent-number", 2);
-            final Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.transform(xmlInput, xmlOutput);
-            return xmlOutput.getWriter().toString();
-        } catch (final TransformerException e) {
-            throw new FralaxException("could not format string", e);
         }
     }
 
@@ -167,16 +153,15 @@ class VtdXmlParserContext implements XmlContext {
      */
     private List<String> evaluateAttributes() throws NavException {
         final List<String> attributes = new ArrayList<>();
-        int attrCount = navigation.getAttrCount();
-        int curIndex = navigation.getCurrentIndex();
+        final int attrCount = navigation.getAttrCount();
+        final int curIndex = navigation.getCurrentIndex();
         for (int i = curIndex + 1; i < curIndex + 1 + attrCount * 2; i += 2) {
-            String attributeKey = navigation.toRawString(i);
-            String attributeValue = navigation.toRawString(i + 1);
+            final String attributeKey = navigation.toNormalizedString(i).replaceFirst("(.*):", "");
+            final String attributeValue = navigation.toRawString(i + 1);
             attributes.add(attributeKey + "=\"" + attributeValue + "\"");
         }
         return attributes;
     }
-
 
     /**
      * Used to get All Children of the Current Node as Well as its Siblings. Uses Recursive DFS to find all nodes required then parses them into XMLElements
@@ -194,7 +179,7 @@ class VtdXmlParserContext implements XmlContext {
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
             traverse(rootDepth, startDepth, childrenAndSiblings.children);
         } else {
-            childrenAndSiblings.children.add(navigation.getXPathStringVal());
+            childrenAndSiblings.children.add(navigation.getXPathStringVal().replaceFirst("(.*):", ""));
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
@@ -211,16 +196,17 @@ class VtdXmlParserContext implements XmlContext {
     private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
         int curIndex = navigation.getCurrentIndex();
         String child = "<";
-        child = child + navigation.toNormalizedString(curIndex);
+        child = child + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "");
         for (final String attribute : evaluateAttributes()) {
             child = child + " " + attribute;
         }
         child = child + ">";
-        final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
+        ChildrenAndSiblings childrenAndSiblings;
+        childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
         for (final String childChild : childrenAndSiblings.children) {
             child = child + childChild;
         }
-        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
+        child = child + "</" + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "") + ">";
         elements.add(child);
         elements.addAll(childrenAndSiblings.siblings);
     }
