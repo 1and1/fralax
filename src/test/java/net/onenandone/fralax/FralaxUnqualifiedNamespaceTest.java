@@ -125,5 +125,20 @@ public class FralaxUnqualifiedNamespaceTest {
         xml.selectAll("@id='RR1'");
     }
 
+    @Test
+    public void testSelectMutiple() throws Exception {
+        final List<XmlContext> contexts = xml.selectAll("//author | //title");
+        assertFalse(contexts.isEmpty());
+        assertEquals("<author>Writer</author>\n",
+                contexts.get(0).asString(true));
+        assertEquals("<author>Poet</author>\n",
+                contexts.get(1).asString(true));
+        assertEquals("<title>The First Book</title>\n",
+                contexts.get(2).asString(true));
+        assertEquals("<title>The Poet's First Poem</title>\n",
+                contexts.get(3).asString(true));
+
+    }
+
 }
 

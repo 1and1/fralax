@@ -16,7 +16,8 @@ public interface XmlContext {
     /**
      * Registers a namespace with this certain xml document for use when evaluating xpath requests.
      * E.g.
-     *
+     * <pre>
+     * {@code
      * XmlContext xml = Fralax.parse(fileToParse);
      * xml.registerNamespace("ns", "http://www.google.com");
      * xml.select("//ns:element"); //now uses the namespace
