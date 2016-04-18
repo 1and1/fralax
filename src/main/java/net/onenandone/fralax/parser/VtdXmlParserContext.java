@@ -101,7 +101,9 @@ class VtdXmlParserContext implements XmlContext {
             }
             return xmlElements;
         } catch (XPathEvalException | NavException e) {
-            if (e.getMessage().contains("binary")) {
+            if (" Function Expr can't eval to node set ".equals(e.getMessage())) {
+                return Collections.singletonList(new ValueContext(selectionAutoPilot.evalXPathToString()));
+            } else if (e.getMessage().contains("binary")) {
                 throw new FralaxException("Binary Expressions are not supported", e);
             } else {
                 throw new FralaxException("Error when navigating through XPathResults", e);

@@ -18,6 +18,15 @@ public class FralaxTest {
     }
 
     @Test
+    public void testCount() throws Exception {
+        final Optional<XmlContext> optionalContext = xml.select("count(/driverVehicleInfo/vehicle)");
+        assertNotNull(optionalContext);
+        assertTrue(optionalContext.isPresent());
+
+        assertEquals("3", optionalContext.get().asString());
+    }
+
+    @Test
     public void testSelectSingleElement() throws Exception {
         final Optional<XmlContext> optionalContext = xml.select("/driverVehicleInfo/vehicle[@id='RR1']");
 
