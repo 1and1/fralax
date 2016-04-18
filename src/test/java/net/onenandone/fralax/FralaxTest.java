@@ -116,7 +116,7 @@ public class FralaxTest {
                         "  <vehicleId>1</vehicleId>\n" +
                         "  <vehicleId>2</vehicleId>\n" +
                         "</driver>\n",
-                optionalContext.get().asFormattedString()
+                optionalContext.get().asString(true)
         );
     }
 
@@ -125,9 +125,9 @@ public class FralaxTest {
     public void testSelectListOfAttributes() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//@id");
         assertEquals(3, contexts.size());
-        assertEquals("RR1", contexts.get(0).asFormattedString());
-        assertEquals("AM1", contexts.get(1).asFormattedString());
-        assertEquals("B1", contexts.get(2).asFormattedString());
+        assertEquals("RR1", contexts.get(0).asString(true));
+        assertEquals("AM1", contexts.get(1).asString(true));
+        assertEquals("B1", contexts.get(2).asString(true));
     }
 
     @Test(expected = FralaxException.class)
