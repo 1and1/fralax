@@ -1,3 +1,7 @@
 .idea
 .gradle
 build
+
+# prevent accidental crendetial commit
+gradle.properties
+secring.gpg
