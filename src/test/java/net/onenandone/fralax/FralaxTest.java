@@ -1,9 +1,10 @@
 package net.onenandone.fralax;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,11 +12,13 @@ import static org.junit.Assert.*;
 
 public class FralaxTest {
 
-    private XmlContext xml;
+    private static XmlContext xml;
+    private static String file;
 
-    @Before
-    public void setUp() throws Exception {
-        xml = Fralax.parse(FralaxTest.class.getResource("/driverVehicleInfo.xml").getFile());
+    @BeforeClass
+    public static void setUp() throws Exception {
+        file = FralaxTest.class.getResource("/driverVehicleInfo.xml").getFile();
+        xml = Fralax.parse(file);
     }
 
     @Test
@@ -127,12 +130,25 @@ public class FralaxTest {
         xml.selectAll("@id='RR1'");
     }
 
-    @Test @Ignore
-    //TODO: Test
+    @Test
     public void testWatcherService() throws Exception {
-       /* while (true) {
-            System.out.println(Fralax.fileWatcher.isValid());
-            Thread.sleep(500);
-        }*/
+        for (int i = 0; i < 50; i++) {
+            testWatcherServiceOnce();
+        }
+    }
+
+    private void testWatcherServiceOnce() throws Exception {
+        setUp();
+        assertTrue(xml.isValid());
+        //We wait as to make sure the system calls for the lastModified date are actually changed. In production,
+        //this just means, that a change is not registered immediately as we have to wait for the OS to write
+        //last modified date and our thread has to realize the check.
+        Thread.sleep(1000);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        bw.write(xml.asString(true));
+        bw.flush();
+        bw.close();
+        Thread.sleep(500);
+        assertFalse(xml.isValid());
     }
 }

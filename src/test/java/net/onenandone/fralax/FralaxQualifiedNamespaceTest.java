@@ -1,6 +1,6 @@
 package net.onenandone.fralax;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
@@ -8,13 +8,15 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class FralaxQualifiedNamespaceTest {
+public class FralaxQualifiedNamespaceTest extends FralaxTest {
 
-    private XmlContext xml;
+    private static XmlContext xml;
+    private static String file;
 
-    @Before
-    public void setUp() throws Exception {
-        xml = Fralax.parse(FralaxTest.class.getResource("/books-qualified.xml").getFile());
+    @BeforeClass
+    public static void setUp() throws Exception {
+        file = FralaxTest.class.getResource("/books-qualified.xml").getFile();
+        xml = Fralax.parse(file);
         xml.registerNamespace("b", "urn:books:qualified");
     }
 
@@ -151,7 +153,7 @@ public class FralaxQualifiedNamespaceTest {
     }
 
     @Test
-    public void testSelectMutiple() throws Exception {
+    public void testSelectMultiple() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//b:author | //b:title");
         assertFalse(contexts.isEmpty());
         assertEquals("<author>Writer</author>\n",
@@ -164,7 +166,6 @@ public class FralaxQualifiedNamespaceTest {
                 contexts.get(3).asString(true));
 
     }
-
 
 }
 

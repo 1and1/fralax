@@ -15,6 +15,8 @@ class VtdXmlParserContext implements XmlContext {
     private AutoPilot autopilot;
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
+    private VtdXmlParser parser;
+
 
     /**
      * Default constructor used to create a newly parsed XMLContext from a certain file.
@@ -23,7 +25,8 @@ class VtdXmlParserContext implements XmlContext {
      * @throws IOException    thrown when an error occurs while opening the file.
      * @throws ParseException thrown when an error occurs during parsing of the xml file.
      */
-    VtdXmlParserContext(final String file) throws IOException, ParseException {
+    VtdXmlParserContext(final String file, final VtdXmlParser parser) throws IOException, ParseException {
+        this.parser = parser;
         final File fileToParse = new File(file);
         try (final FileInputStream fileInputStream = new FileInputStream(fileToParse)) {
             byte[] xmlByteArray = new byte[(int) fileToParse.length()];
@@ -50,6 +53,11 @@ class VtdXmlParserContext implements XmlContext {
         this.autopilot = autopilot;
         this.navigation = navigation;
         this.registeredNamespaces = registeredNamespaces;
+    }
+
+    @Override
+    public boolean isValid() {
+        return parser.isValid();
     }
 
     @Override
@@ -92,9 +100,9 @@ class VtdXmlParserContext implements XmlContext {
             while (xpathResultIndex != -1) {
                 //Take into account searches for Attribute/Value of an Element
                 if (selectionNavigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_CHARACTER_DATA) {
-                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex)));
+                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex), parser));
                 } else if (selectionNavigation.getTokenType(xpathResultIndex) == VTDNav.TOKEN_ATTR_NAME) {
-                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex + 1)));
+                    xmlElements.add(new ValueContext(selectionNavigation.toNormalizedString(xpathResultIndex + 1), parser));
                 } else {
                     final VTDNav clonedNavigation = selectionNavigation.cloneNav();
                     final AutoPilot clonedAutoPilot = new AutoPilot(clonedNavigation);

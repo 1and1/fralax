@@ -1,7 +1,7 @@
 package net.onenandone.fralax.parser;
 
-import net.onenandone.fralax.XmlContext;
 import net.onenandone.fralax.FralaxException;
+import net.onenandone.fralax.XmlContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,14 +14,21 @@ import java.util.Optional;
 class ValueContext implements XmlContext {
 
     private final String value;
+    private final VtdXmlParser parser;
 
     /**
      * Creates the ValueContext.
      *
      * @param value value to assign to the context.
      */
-    ValueContext(final String value) {
+    ValueContext(final String value, VtdXmlParser parser) {
         this.value = value;
+        this.parser = parser;
+    }
+
+    @Override
+    public boolean isValid() {
+        return parser.isValid();
     }
 
     /** Not supported. */
