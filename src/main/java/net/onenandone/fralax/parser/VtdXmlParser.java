@@ -17,14 +17,12 @@ import java.io.IOException;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class VtdXmlParser implements XmlParser {
 
-    @Getter
-    private FileWatcherThread fileWatcherThread;
     @Getter @Setter
     private boolean valid = true;
 
     @Override
     public VtdXmlParserContext parse(final String file) {
-        fileWatcherThread = new FileWatcherThread(file, this);
+        FileWatcherThread fileWatcherThread = new FileWatcherThread(file, this);
         fileWatcherThread.start();
         try {
             return new VtdXmlParserContext(file, this);
