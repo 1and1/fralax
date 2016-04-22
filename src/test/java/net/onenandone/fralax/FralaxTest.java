@@ -160,4 +160,5 @@ public class FralaxTest {
         Thread.sleep(500);
         assertFalse(xml.isValid());
     }
+
 }

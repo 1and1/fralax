@@ -1,5 +1,6 @@
 package net.onenandone.fralax.parser;
 
+import net.onenandone.fralax.FralaxException;
 import net.onenandone.fralax.XmlContext;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class FileWatcherThread extends Thread {
                 //reduce cpu time
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                throw new FralaxException("Error in the FileWatcher for file " + file);
             }
         }
     }

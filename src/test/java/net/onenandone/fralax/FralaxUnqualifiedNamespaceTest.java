@@ -3,12 +3,14 @@ package net.onenandone.fralax;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class FralaxUnqualifiedNamespaceTest  extends FralaxTest {
+public class FralaxUnqualifiedNamespaceTest {
 
     private static XmlContext xml;
     private static String file;
@@ -140,6 +142,28 @@ public class FralaxUnqualifiedNamespaceTest  extends FralaxTest {
         assertEquals("<title>The Poet's First Poem</title>\n",
                 contexts.get(3).asString(true));
 
+    }
+
+    @Test
+    public void testWatcherService() throws Exception {
+        for (int i = 0; i < 50; i++) {
+            testWatcherServiceOnce();
+        }
+    }
+
+    private void testWatcherServiceOnce() throws Exception {
+        setUp();
+        assertTrue(xml.isValid());
+        //We wait as to make sure the system calls for the lastModified date are actually changed. In production,
+        //this just means, that a change is not registered immediately as we have to wait for the OS to write
+        //last modified date and our thread has to realize the check.
+        Thread.sleep(1000);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        bw.write(xml.asString(true));
+        bw.flush();
+        bw.close();
+        Thread.sleep(500);
+        assertFalse(xml.isValid());
     }
 
 
