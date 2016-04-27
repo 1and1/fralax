@@ -32,6 +32,7 @@ public class FileWatcherThread extends Thread {
         while (true) {
             if (firstModified < new File(file).lastModified()) {
                 parser.setValid(false);
+                return;
             }
             try {
                 //reduce cpu time
