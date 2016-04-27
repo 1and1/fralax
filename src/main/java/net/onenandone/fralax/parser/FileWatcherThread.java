@@ -22,11 +22,11 @@ public class FileWatcherThread extends Thread {
         firstModified = System.currentTimeMillis();
     }
 
-    @Override
     /**
      * The run function for the File Watcher Thread. Creates a WatchService and polls events happening in the directory
      * of the file specified in the Constructor. When an external change occurs, it notifies the parser by setting its validity field to false.
      */
+    @Override
     public void run() {
         //noinspection InfiniteLoopStatement
         while (true) {

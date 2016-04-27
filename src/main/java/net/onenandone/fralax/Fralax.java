@@ -11,7 +11,6 @@ import java.util.Objects;
 @SuppressWarnings("WeakerAccess")
 public class Fralax {
 
-
     /**
      * @param file file to parse.
      * @return a new searchable XmlContext of the contents of the file if parsing was successful.
