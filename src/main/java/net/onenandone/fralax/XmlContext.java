@@ -1,10 +1,8 @@
 package net.onenandone.fralax;
 
-import javax.xml.transform.*;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
-import java.io.StringWriter;
+import com.greenbird.xml.prettyprinter.PrettyPrinter;
+import com.greenbird.xml.prettyprinter.PrettyPrinterBuilder;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -78,22 +76,20 @@ public interface XmlContext {
      * @return object as String.
      */
     default String asString(final boolean formatted) {
+        String unformatted = asString();
         if (formatted) {
-            try {
-                final Source xmlInput = new StreamSource(new StringReader(asString()));
-                final StringWriter stringWriter = new StringWriter();
-                final StreamResult xmlOutput = new StreamResult(stringWriter);
-                final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                transformerFactory.setAttribute("indent-number", 2);
-                final Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-                transformer.transform(xmlInput, xmlOutput);
-                return xmlOutput.getWriter().toString();
-            } catch (final TransformerException e) {
-                throw new FralaxException("could not format string", e);
+            PrettyPrinter prettyPrinter = PrettyPrinterBuilder.newPrettyPrinter().ignoreWhitespace().build();
+            StringBuilder buffer = new StringBuilder();
+            if (prettyPrinter.process(unformatted, buffer)) {
+                String formattedString = buffer.toString();
+                if (formattedString.startsWith("\n")) {
+                    formattedString = formattedString.substring(1, formattedString.length());
+                    return formattedString;
+                }
+            } else {
+                throw new FralaxException("Error when pretty printing the xml file " + unformatted);
             }
         }
-        return asString();
+        return unformatted;
     }
 }
