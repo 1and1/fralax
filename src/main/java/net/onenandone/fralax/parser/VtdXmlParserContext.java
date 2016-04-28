@@ -4,13 +4,20 @@ import com.ximpleware.*;
 import net.onenandone.fralax.FralaxException;
 import net.onenandone.fralax.XmlContext;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
  */
 class VtdXmlParserContext implements XmlContext {
+
+    private static final Pattern NAMESPACE_PATTERN = Pattern.compile("xmlns((:)([a-z]))?");
 
     private AutoPilot autopilot;
     private VTDNav navigation;
@@ -35,6 +42,41 @@ class VtdXmlParserContext implements XmlContext {
             vtdGen.parse(true); // set namespace awareness to true
             navigation = vtdGen.getNav();
             autopilot = new AutoPilot(navigation);
+
+            analyzeNamespaces();
+        }
+    }
+
+    /**
+     * Analyzes namespaces of the specified XML file.
+     * <p />
+     * All namespaces will be registered by the prefix defined in the XML. The Xpath will therefore rely on the same namespace prefixes as of the XML.
+     */
+    private void analyzeNamespaces() {
+        final VTDNav namespaceNavigation = navigation.cloneNav();
+        boolean rootElementAnalyzed = false;
+        int index = namespaceNavigation.getRootIndex();
+        while (!rootElementAnalyzed) {
+            index++;
+            if (namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_STARTING_TAG || namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_ENDING_TAG) {
+                rootElementAnalyzed = true;
+            } else {
+                try {
+                    if (namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_ATTR_NS) {
+                        final Matcher namespaceMatcher = NAMESPACE_PATTERN.matcher(namespaceNavigation.toString(index));
+                        if (namespaceMatcher.matches()) {
+                            final String prefix = namespaceMatcher.group(3);
+                            index++;
+                            if (prefix != null) {
+                                registeredNamespaces.put(prefix, namespaceNavigation.toString(index));
+                                addNamespacesToAutopilot(autopilot, registeredNamespaces);
+                            }
+                        }
+                    }
+                } catch (final NavException e) {
+                    throw new FralaxException("could not parse namespaces", e);
+                }
+            }
         }
     }
 
@@ -42,20 +84,14 @@ class VtdXmlParserContext implements XmlContext {
      * Constructor used to create a newly parsed XMLContext from an XPath Result. takes a freshly created Autopilot
      * and navigation in which the result is embedded.
      *
-     * @param autopilot autopilot for the specified navigation.
-     * @param navigation navigation to navigate through the xpath result.
+     * @param autopilot            autopilot for the specified navigation.
+     * @param navigation           navigation to navigate through the xpath result.
      * @param registeredNamespaces namespaces to register for the new xml context.
      */
     private VtdXmlParserContext(final AutoPilot autopilot, final VTDNav navigation, final Map<String, String> registeredNamespaces) {
         this.autopilot = autopilot;
         this.navigation = navigation;
         this.registeredNamespaces = registeredNamespaces;
-    }
-
-    @Override
-    public void registerNamespace(String key, String value) {
-        registeredNamespaces.put(key, value);
-        addNamespacesToAutopilot(autopilot, registeredNamespaces);
     }
 
     /** Adds all registered Namespaces to the Autopilot for evaluation. */
@@ -130,7 +166,7 @@ class VtdXmlParserContext implements XmlContext {
 
         try {
             final int index = selectionNavigation.getCurrentIndex();
-            String curElement = "<" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "");
+            String curElement = "<" + selectionNavigation.toNormalizedString(index);
             for (String attribute : evaluateAttributes()) {
                 curElement = curElement + " " + attribute;
             }
@@ -145,9 +181,9 @@ class VtdXmlParserContext implements XmlContext {
             }
             if (curOldElement.equals(curElement)) {
                 selectionNavigation.recoverNode(index);
-                curElement = curElement + selectionNavigation.getXPathStringVal().replaceFirst("(.*):", "");
+                curElement = curElement + selectionNavigation.getXPathStringVal();
             }
-            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index).replaceFirst("(.*):", "") + ">";
+            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index) + ">";
 
             return curElement;
         } catch (NavException e) {
@@ -166,7 +202,7 @@ class VtdXmlParserContext implements XmlContext {
         final int attrCount = navigation.getAttrCount();
         final int curIndex = navigation.getCurrentIndex();
         for (int i = curIndex + 1; i < curIndex + 1 + attrCount * 2; i += 2) {
-            final String attributeKey = navigation.toNormalizedString(i).replaceFirst("(.*):", "");
+            final String attributeKey = navigation.toNormalizedString(i);
             final String attributeValue = navigation.toRawString(i + 1);
             attributes.add(attributeKey + "=\"" + attributeValue + "\"");
         }
@@ -189,7 +225,7 @@ class VtdXmlParserContext implements XmlContext {
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
             traverse(rootDepth, startDepth, childrenAndSiblings.children);
         } else {
-            childrenAndSiblings.children.add(navigation.getXPathStringVal().replaceFirst("(.*):", ""));
+            childrenAndSiblings.children.add(navigation.getXPathStringVal());
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
@@ -207,15 +243,15 @@ class VtdXmlParserContext implements XmlContext {
      * Traverses all child and its sibling elements for a certain element. Uses a DFS approach: go to deepest
      * element as long as possible, then resolve the children.
      *
-     * @param rootDepth the depth of the root element of this context.
+     * @param rootDepth  the depth of the root element of this context.
      * @param startDepth the depth we started our search on (so the depth of the first result for the xpath).
-     * @param elements the elements to fill.
+     * @param elements   the elements to fill.
      * @throws NavException thrown when an error occurs navigating through the context.
      */
     private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
         int curIndex = navigation.getCurrentIndex();
         String child = "<";
-        child = child + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "");
+        child = child + navigation.toNormalizedString(curIndex);
         for (final String attribute : evaluateAttributes()) {
             child = child + " " + attribute;
         }
@@ -225,7 +261,7 @@ class VtdXmlParserContext implements XmlContext {
         for (final String childChild : childrenAndSiblings.children) {
             child = child + childChild;
         }
-        child = child + "</" + navigation.toNormalizedString(curIndex).replaceFirst("(.*):", "") + ">";
+        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
         elements.add(child);
         elements.addAll(childrenAndSiblings.siblings);
     }
