@@ -209,7 +209,7 @@ public class FralaxTest {
         bw.flush();
         bw.close();
         //wait for AutoUpdater to actually get changed file date from os.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         Optional<XmlContext> opel = xml.select("//vehicle[@id='O1']");
         if (opel.isPresent()) {
             assertEquals("<vehicle id=\"O1\">\n" +

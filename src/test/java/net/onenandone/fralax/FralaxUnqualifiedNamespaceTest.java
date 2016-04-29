@@ -210,7 +210,7 @@ public class FralaxUnqualifiedNamespaceTest {
         bw.flush();
         bw.close();
         //wait for AutoUpdater to actually get changed file date from os.
-        Thread.sleep(1500);
+        Thread.sleep(2000);
         Optional<XmlContext> hello = xml.select("//book[@id='bk003']");
         if (hello.isPresent()) {
             assertEquals("<book id=\"bk003\">\n" +
