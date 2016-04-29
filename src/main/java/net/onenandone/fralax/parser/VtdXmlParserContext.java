@@ -49,7 +49,7 @@ class VtdXmlParserContext implements XmlContext {
 
     /**
      * Analyzes namespaces of the specified XML file.
-     * <p />
+     * <p/>
      * All namespaces will be registered by the prefix defined in the XML. The Xpath will therefore rely on the same namespace prefixes as of the XML.
      */
     private void analyzeNamespaces() {

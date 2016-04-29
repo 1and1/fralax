@@ -14,10 +14,14 @@ public class Fralax {
     /**
      * @param file file to parse.
      * @return a new searchable XmlContext of the contents of the file if parsing was successful.
-     * @see #parse(String, Class)
+     * @see #parse(String, Class, boolean)
      */
-    public static XmlContext parse(final String file) {
-        return parse(file, VtdXmlParser.class);
+    public static XmlRootContext parse(final String file) {
+        return parse(file, VtdXmlParser.class, false);
+    }
+
+    public static XmlRootContext parse(final String file, final boolean autoUpdate) {
+        return parse(file, VtdXmlParser.class, autoUpdate);
     }
 
 
@@ -29,13 +33,13 @@ public class Fralax {
      * @param xmlParserClass the class of the specific parser to create.
      * @return a new searchable XmlContext of the contents of the file if parsing was successful.
      */
-    public static XmlContext parse(final String file, final Class<? extends XmlParser> xmlParserClass) {
+    public static XmlRootContext parse(final String file, final Class<? extends XmlParser> xmlParserClass, boolean autoUpdate) {
         Objects.requireNonNull(file, "the xml file may not be null");
         Objects.requireNonNull(xmlParserClass, "the xml parser class may not be null");
 
         try {
             final XmlParser xmlParser = xmlParserClass.newInstance();
-            return xmlParser.parse(file);
+            return xmlParser.parse(file, autoUpdate);
         } catch (final InstantiationException | IllegalAccessException e) {
             throw new FralaxException("could not instantiate xml parser class '" + xmlParserClass.getCanonicalName() + "'", e);
         }

@@ -14,23 +14,16 @@ import java.util.Optional;
 class ValueContext implements XmlContext {
 
     private final String value;
-    private final VtdXmlParser parser;
 
     /**
      * Creates the ValueContext.
      *
      * @param value value to assign to the context.
      */
-    ValueContext(final String value, VtdXmlParser parser) {
+    ValueContext(final String value) {
         this.value = value;
-        this.parser = parser;
     }
-
-    @Override
-    public boolean isValid() {
-        return parser.isValid();
-    }
-
+    
     /** Not supported. */
     @Override
     public Optional<XmlContext> select(String xpath) throws FralaxException {

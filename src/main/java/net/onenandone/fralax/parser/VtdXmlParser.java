@@ -2,9 +2,7 @@ package net.onenandone.fralax.parser;
 
 import com.ximpleware.ParseException;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import net.onenandone.fralax.FralaxException;
 import net.onenandone.fralax.XmlParser;
 
@@ -17,15 +15,10 @@ import java.io.IOException;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class VtdXmlParser implements XmlParser {
 
-    @Getter @Setter
-    private boolean valid = true;
-
     @Override
-    public VtdXmlParserContext parse(final String file) {
-        FileWatcherThread fileWatcherThread = new FileWatcherThread(file, this);
-        fileWatcherThread.start();
+    public VtdXmlParserRootContext parse(final String file, boolean autoUpdate) {
         try {
-            return new VtdXmlParserContext(file, this);
+            return new VtdXmlParserRootContext(file, autoUpdate);
         } catch (final IOException e) {
             throw new FralaxException("Error in reading Input File " + file, e);
         } catch (final ParseException e) {

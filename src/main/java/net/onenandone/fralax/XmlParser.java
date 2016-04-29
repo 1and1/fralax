@@ -9,8 +9,9 @@ public interface XmlParser {
      * Returns the parsed file after running it through the parser.
      *
      * @param file file to parse.
+     * @param autoUpdate if an autoUpdate should take place on external modification of the file.
      * @return parsed xml as xml Context.
      */
-    XmlContext parse(final String file);
+    XmlRootContext parse(final String file, boolean autoUpdate);
 
 }

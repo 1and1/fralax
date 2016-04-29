@@ -76,27 +76,4 @@ public interface XmlContext {
         }
         return unformatted;
     }
-
-    /**
-     * An optional method that will return if the underlying document has been modified since the first parse. Will return true if
-     * the document was not modified and false if it was. In the case of in-place parsers like SAX or StAX, this method
-     * is not necessarily needed, as continued parses on a file will re-read the entire document. However, it
-     * is preferred to copy and save the original file and use this for continued parsing as to not cause the following
-     * case:
-     * <pre>
-     * {@code
-     * XmlContext xml = Fralax.parse(fileToParse);
-     * xml.select("//element1");
-     * //Now the underlying xml file is changed externally removing all content.
-     * xml.select("//elementThatIsChildOfElement1"); //Will throw a FralaxException in in-place parsers as the xml file is now empty.
-     * }
-     * </pre>
-     * In the case of in-memory parsers, (like the default VtdParser) this method should always be implemented as to give the user a chance to
-     * check for changes in the original document and reparse the document if needed.
-     *
-     * @return if the underlying document has been modified externally.
-     */
-    default boolean isValid() {
-        return true;
-    }
 }
