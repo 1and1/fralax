@@ -16,19 +16,21 @@ public interface XmlRootContext extends XmlContext {
      * Stops the associated AutoUpdater from running if it was running.
      */
     default void stopAutoUpdate() {
+        //Optional method
     }
 
     /**
      * Starts a new AutoUpdater for this root Context.
      */
     default void startAutoUpdate() {
+        //Optional Method
     }
 
     /**
      * An optional method that will reparse the root xml context. Called by the AutoUpdater if it's used.
      */
     default void update() throws IOException, ParseException {
-
+        //Optional method
     }
 
 
