@@ -1,10 +1,8 @@
 package net.onenandone.fralax;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,37 +10,33 @@ import static org.junit.Assert.*;
 
 public class FralaxQualifiedNamespaceTest {
 
-    private static XmlContext xml;
-    private static String file;
+    private XmlContext xml;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        file = FralaxTest.class.getResource("/books-qualified.xml").getFile();
-        xml = Fralax.parse(file);
-        xml.registerNamespace("b", "urn:books:qualified");
+    @Before
+    public void setUp() throws Exception {
+        xml = Fralax.parse(FralaxTest.class.getResource("/books-qualified.xml").getFile());
     }
 
     @Test
     public void setNoSelectToString() throws Exception {
         assertEquals(
-                "<x:books xmlns:x=\"urn:books:qualified\">\n" +
-                        "    <x:book id=\"bk001\">\n" +
-                        "        <x:author>Writer</x:author>\n" +
-                        "        <x:title>The First Book</x:title>\n" +
-                        "        <x:genre>Fiction</x:genre>\n" +
-                        "        <x:price>44.95</x:price>\n" +
-                        "        <x:pub_date>2000-10-01</x:pub_date>\n" +
-                        "        <x:review>An amazing story of nothing.</x:review>\n" +
-                        "    </x:book>\n" +
-                        "\n" +
-                        "    <x:book id=\"bk002\">\n" +
-                        "        <x:author>Poet</x:author>\n" +
-                        "        <x:title>The Poet's First Poem</x:title>\n" +
-                        "        <x:genre>Poem</x:genre>\n" +
-                        "        <x:price>24.95</x:price>\n" +
-                        "        <x:review>Least poetic poems.</x:review>\n" +
-                        "    </x:book>\n" +
-                        "</x:books>\n",
+                "<b:books xmlns:b=\"urn:books:qualified\">\n" +
+                        "\t<b:book id=\"bk001\">\n" +
+                        "\t\t<b:author>Writer</b:author>\n" +
+                        "\t\t<b:title>The First Book</b:title>\n" +
+                        "\t\t<b:genre>Fiction</b:genre>\n" +
+                        "\t\t<b:price>44.95</b:price>\n" +
+                        "\t\t<b:pub_date>2000-10-01</b:pub_date>\n" +
+                        "\t\t<b:review>An amazing story of nothing.</b:review>\n" +
+                        "\t</b:book>\n" +
+                        "\t<b:book id=\"bk002\">\n" +
+                        "\t\t<b:author>Poet</b:author>\n" +
+                        "\t\t<b:title>The Poet's First Poem</b:title>\n" +
+                        "\t\t<b:genre>Poem</b:genre>\n" +
+                        "\t\t<b:price>24.95</b:price>\n" +
+                        "\t\t<b:review>Least poetic poems.</b:review>\n" +
+                        "\t</b:book>\n" +
+                        "</b:books>",
                 xml.asString(true)
         );
     }
@@ -119,7 +113,7 @@ public class FralaxQualifiedNamespaceTest {
         final Optional<XmlContext> optionalContext = xml.select("/b:books/b:book[2]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
-        assertEquals("<book id=\"bk002\"><author>Poet</author><title>The Poet's First Poem</title><genre>Poem</genre><price>24.95</price><review>Least poetic poems.</review></book>",
+        assertEquals("<b:book id=\"bk002\"><b:author>Poet</b:author><b:title>The Poet's First Poem</b:title><b:genre>Poem</b:genre><b:price>24.95</b:price><b:review>Least poetic poems.</b:review></b:book>",
                 optionalContext.get().asString()
         );
     }
@@ -129,14 +123,14 @@ public class FralaxQualifiedNamespaceTest {
         final Optional<XmlContext> optionalContext = xml.select("/b:books/b:book[1]");
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
-        assertEquals("<book id=\"bk001\">\n" +
-                        "  <author>Writer</author>\n" +
-                        "  <title>The First Book</title>\n" +
-                        "  <genre>Fiction</genre>\n" +
-                        "  <price>44.95</price>\n" +
-                        "  <pub_date>2000-10-01</pub_date>\n" +
-                        "  <review>An amazing story of nothing.</review>\n" +
-                        "</book>\n",
+        assertEquals("<b:book id=\"bk001\">\n" +
+                        "\t<b:author>Writer</b:author>\n" +
+                        "\t<b:title>The First Book</b:title>\n" +
+                        "\t<b:genre>Fiction</b:genre>\n" +
+                        "\t<b:price>44.95</b:price>\n" +
+                        "\t<b:pub_date>2000-10-01</b:pub_date>\n" +
+                        "\t<b:review>An amazing story of nothing.</b:review>\n" +
+                        "</b:book>",
                 optionalContext.get().asString(true)
         );
     }
@@ -155,41 +149,20 @@ public class FralaxQualifiedNamespaceTest {
     }
 
     @Test
-    public void testSelectMultiple() throws Exception {
+    public void testSelectMutiple() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//b:author | //b:title");
         assertFalse(contexts.isEmpty());
-        assertEquals("<author>Writer</author>\n",
+        assertEquals("<b:author>Writer</b:author>",
                 contexts.get(0).asString(true));
-        assertEquals("<author>Poet</author>\n",
+        assertEquals("<b:author>Poet</b:author>",
                 contexts.get(1).asString(true));
-        assertEquals("<title>The First Book</title>\n",
+        assertEquals("<b:title>The First Book</b:title>",
                 contexts.get(2).asString(true));
-        assertEquals("<title>The Poet's First Poem</title>\n",
+        assertEquals("<b:title>The Poet's First Poem</b:title>",
                 contexts.get(3).asString(true));
 
     }
 
-    @Test
-    public void testWatcherService() throws Exception {
-        for (int i = 0; i < 50; i++) {
-            testWatcherServiceOnce();
-        }
-    }
-
-    private void testWatcherServiceOnce() throws Exception {
-        setUp();
-        assertTrue(xml.isValid());
-        //We wait as to make sure the system calls for the lastModified date are actually changed. In production,
-        //this just means, that a change is not registered immediately as we have to wait for the OS to write
-        //last modified date and our thread has to realize the check.
-        Thread.sleep(1000);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(xml.asString(true));
-        bw.flush();
-        bw.close();
-        Thread.sleep(500);
-        assertFalse(xml.isValid());
-    }
 
 }
 

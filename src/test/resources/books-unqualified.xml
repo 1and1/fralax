@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<x:books xmlns:x="urn:books:unqualified">
+<b:books xmlns:b="urn:books:unqualified">
     <book id="bk001">
         <author>Writer</author>
         <title>The First Book</title>
@@ -16,4 +16,4 @@
         <price>24.95</price>
         <review>Least poetic poems.</review>
     </book>
-</x:books>
+</b:books>

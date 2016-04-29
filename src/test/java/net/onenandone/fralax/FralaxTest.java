@@ -114,12 +114,12 @@ public class FralaxTest {
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<driver>\n" +
-                        "  <driverId>1</driverId>\n" +
-                        "  <firstName>John</firstName>\n" +
-                        "  <lastName>Doe</lastName>\n" +
-                        "  <vehicleId>1</vehicleId>\n" +
-                        "  <vehicleId>2</vehicleId>\n" +
-                        "</driver>\n",
+                        "\t<driverId>1</driverId>\n" +
+                        "\t<firstName>John</firstName>\n" +
+                        "\t<lastName>Doe</lastName>\n" +
+                        "\t<vehicleId>1</vehicleId>\n" +
+                        "\t<vehicleId>2</vehicleId>\n" +
+                        "</driver>",
                 optionalContext.get().asString(true)
         );
     }

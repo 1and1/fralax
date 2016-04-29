@@ -1,10 +1,8 @@
 package net.onenandone.fralax;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,14 +10,12 @@ import static org.junit.Assert.*;
 
 public class FralaxUnqualifiedNamespaceTest {
 
-    private static XmlContext xml;
-    private static String file;
+    private XmlContext xml;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        file = FralaxTest.class.getResource("/books-unqualified.xml").getFile();
-        xml = Fralax.parse(file);
-        xml.registerNamespace("b", "urn:books:unqualified");
+
+    @Before
+    public void setUp() throws Exception {
+        xml = Fralax.parse(FralaxTest.class.getResource("/books-unqualified.xml").getFile());
     }
 
     @Test
@@ -105,13 +101,13 @@ public class FralaxUnqualifiedNamespaceTest {
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<book id=\"bk001\">\n" +
-                        "  <author>Writer</author>\n" +
-                        "  <title>The First Book</title>\n" +
-                        "  <genre>Fiction</genre>\n" +
-                        "  <price>44.95</price>\n" +
-                        "  <pub_date>2000-10-01</pub_date>\n" +
-                        "  <review>An amazing story of nothing.</review>\n" +
-                        "</book>\n",
+                        "\t<author>Writer</author>\n" +
+                        "\t<title>The First Book</title>\n" +
+                        "\t<genre>Fiction</genre>\n" +
+                        "\t<price>44.95</price>\n" +
+                        "\t<pub_date>2000-10-01</pub_date>\n" +
+                        "\t<review>An amazing story of nothing.</review>\n" +
+                        "</book>",
                 optionalContext.get().asString(true)
         );
     }
@@ -130,42 +126,19 @@ public class FralaxUnqualifiedNamespaceTest {
     }
 
     @Test
-    public void testSelectMultiple() throws Exception {
+    public void testSelectMutiple() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//author | //title");
         assertFalse(contexts.isEmpty());
-        assertEquals("<author>Writer</author>\n",
+        assertEquals("<author>Writer</author>",
                 contexts.get(0).asString(true));
-        assertEquals("<author>Poet</author>\n",
+        assertEquals("<author>Poet</author>",
                 contexts.get(1).asString(true));
-        assertEquals("<title>The First Book</title>\n",
+        assertEquals("<title>The First Book</title>",
                 contexts.get(2).asString(true));
-        assertEquals("<title>The Poet's First Poem</title>\n",
+        assertEquals("<title>The Poet's First Poem</title>",
                 contexts.get(3).asString(true));
 
     }
-
-    @Test
-    public void testWatcherService() throws Exception {
-        for (int i = 0; i < 50; i++) {
-            testWatcherServiceOnce();
-        }
-    }
-
-    private void testWatcherServiceOnce() throws Exception {
-        setUp();
-        assertTrue(xml.isValid());
-        //We wait as to make sure the system calls for the lastModified date are actually changed. In production,
-        //this just means, that a change is not registered immediately as we have to wait for the OS to write
-        //last modified date and our thread has to realize the check.
-        Thread.sleep(1000);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(xml.asString(true));
-        bw.flush();
-        bw.close();
-        Thread.sleep(500);
-        assertFalse(xml.isValid());
-    }
-
 
 }
 
