@@ -16,7 +16,6 @@ public class FralaxUnqualifiedNamespaceTest {
     @Before
     public void setUp() throws Exception {
         xml = Fralax.parse(FralaxTest.class.getResource("/books-unqualified.xml").getFile());
-        xml.registerNamespace("b", "urn:books:unqualified");
     }
 
     @Test

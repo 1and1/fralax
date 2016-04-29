@@ -9,11 +9,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a valid XML Document parsed from a file. Can be further navigated using xpath queries.
  */
 class VtdXmlParserContext implements XmlContext {
+
+    private static final Pattern NAMESPACE_PATTERN = Pattern.compile("xmlns((:)([a-z]))?");
 
     private AutoPilot autopilot;
     private VTDNav navigation;
@@ -38,6 +42,41 @@ class VtdXmlParserContext implements XmlContext {
             vtdGen.parse(true); // set namespace awareness to true
             navigation = vtdGen.getNav();
             autopilot = new AutoPilot(navigation);
+
+            analyzeNamespaces();
+        }
+    }
+
+    /**
+     * Analyzes namespaces of the specified XML file.
+     * <p />
+     * All namespaces will be registered by the prefix defined in the XML. The Xpath will therefore rely on the same namespace prefixes as of the XML.
+     */
+    private void analyzeNamespaces() {
+        final VTDNav namespaceNavigation = navigation.cloneNav();
+        boolean rootElementAnalyzed = false;
+        int index = namespaceNavigation.getRootIndex();
+        while (!rootElementAnalyzed) {
+            index++;
+            if (namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_STARTING_TAG || namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_ENDING_TAG) {
+                rootElementAnalyzed = true;
+            } else {
+                try {
+                    if (namespaceNavigation.getTokenType(index) == VTDNav.TOKEN_ATTR_NS) {
+                        final Matcher namespaceMatcher = NAMESPACE_PATTERN.matcher(namespaceNavigation.toString(index));
+                        if (namespaceMatcher.matches()) {
+                            final String prefix = namespaceMatcher.group(3);
+                            index++;
+                            if (prefix != null) {
+                                registeredNamespaces.put(prefix, namespaceNavigation.toString(index));
+                                addNamespacesToAutopilot(autopilot, registeredNamespaces);
+                            }
+                        }
+                    }
+                } catch (final NavException e) {
+                    throw new FralaxException("could not parse namespaces", e);
+                }
+            }
         }
     }
 
@@ -53,12 +92,6 @@ class VtdXmlParserContext implements XmlContext {
         this.autopilot = autopilot;
         this.navigation = navigation;
         this.registeredNamespaces = registeredNamespaces;
-    }
-
-    @Override
-    public void registerNamespace(String key, String value) {
-        registeredNamespaces.put(key, value);
-        addNamespacesToAutopilot(autopilot, registeredNamespaces);
     }
 
     /** Adds all registered Namespaces to the Autopilot for evaluation. */

@@ -12,22 +12,6 @@ import java.util.Optional;
 public interface XmlContext {
 
     /**
-     * Registers a namespace with this certain xml document for use when evaluating xpath requests.
-     * E.g.
-     * <pre>
-     * {@code
-     * XmlContext xml = Fralax.parse(fileToParse);
-     * xml.registerNamespace("ns", "http://www.google.com");
-     * xml.select("//ns:element"); //now uses the namespace
-     * }
-     * </pre>
-     *
-     * @param key   the key to register for the namespace.
-     * @param value namespace value to register.
-     */
-    void registerNamespace(final String key, final String value);
-
-    /**
      * Searches for an XPathQuery and returns the result as an XmlContext if it exists{@link Optional#empty()} otherwise.
      * E.g.
      * <pre>
