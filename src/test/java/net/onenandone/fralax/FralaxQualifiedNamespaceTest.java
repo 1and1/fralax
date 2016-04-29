@@ -233,8 +233,13 @@ public class FralaxQualifiedNamespaceTest {
                 "</b:books>");
         bw.flush();
         bw.close();
-        //wait for AutoUpdater to actually get changed file date from os.
-        Thread.sleep(1500);
+        long currentTime = System.currentTimeMillis();
+        boolean present = false;
+        while(System.currentTimeMillis() - currentTime <= 1000000 && !present) {
+            //Try check again in 1000 ms.
+            Thread.sleep(3000);
+            present = xml.select("//b:book[@id='bk003']").isPresent();
+        }
         Optional<XmlContext> hello = xml.select("//b:book[@id='bk003']");
         if (hello.isPresent()) {
             assertEquals("<b:book id=\"bk003\">\n" +
@@ -247,6 +252,8 @@ public class FralaxQualifiedNamespaceTest {
                     hello.get().asString(true));
         }
         else {
+            ((XmlRootContext) xml).stopAutoUpdate();
+            xml = original;
             fail("AutoUpdate failed");
         }
         //Use old xml to continue parsing with correct data.
