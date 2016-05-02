@@ -16,9 +16,9 @@ import java.io.IOException;
 public class VtdXmlParser implements XmlParser {
 
     @Override
-    public VtdXmlParserContext parse(final String file) {
+    public VtdXmlParserRootContext parse(final String file, boolean autoUpdate) {
         try {
-            return new VtdXmlParserContext(file);
+            return new VtdXmlParserRootContext(file, autoUpdate);
         } catch (final IOException e) {
             throw new FralaxException("Error in reading Input File " + file, e);
         } catch (final ParseException e) {

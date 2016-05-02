@@ -1,7 +1,7 @@
 package net.onenandone.fralax.parser;
 
-import net.onenandone.fralax.XmlContext;
 import net.onenandone.fralax.FralaxException;
+import net.onenandone.fralax.XmlContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,7 @@ class ValueContext implements XmlContext {
     ValueContext(final String value) {
         this.value = value;
     }
-
+    
     /** Not supported. */
     @Override
     public Optional<XmlContext> select(String xpath) throws FralaxException {
