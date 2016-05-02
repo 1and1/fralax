@@ -22,6 +22,7 @@ class VtdXmlParserContext implements XmlContext {
     private AutoPilot autopilot;
     private VTDNav navigation;
     private Map<String, String> registeredNamespaces = new HashMap<>();
+    private String xpath = "";
 
     /**
      * Default constructor used to create a newly parsed XMLContext from a certain file.
@@ -88,10 +89,11 @@ class VtdXmlParserContext implements XmlContext {
      * @param navigation           navigation to navigate through the xpath result.
      * @param registeredNamespaces namespaces to register for the new xml context.
      */
-    private VtdXmlParserContext(final AutoPilot autopilot, final VTDNav navigation, final Map<String, String> registeredNamespaces) {
+    private VtdXmlParserContext(final String xpath, final AutoPilot autopilot, final VTDNav navigation, final Map<String, String> registeredNamespaces) {
         this.autopilot = autopilot;
         this.navigation = navigation;
         this.registeredNamespaces = registeredNamespaces;
+        this.xpath = xpath;
     }
 
     /** Adds all registered Namespaces to the Autopilot for evaluation. */
@@ -102,7 +104,7 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    public Optional<XmlContext> select(String xpath) throws FralaxException {
+    public Optional<XmlContext> select(final String xpath) throws FralaxException {
         final List<XmlContext> result = selectAll(xpath);
         if (result.size() > 1) {
             throw new FralaxException("Tried to select one Element as result, but result was " + result.size() + " elements large.");
@@ -122,6 +124,9 @@ class VtdXmlParserContext implements XmlContext {
         addNamespacesToAutopilot(selectionAutoPilot, registeredNamespaces);
 
         try {
+            if (!this.xpath.equals("") && (xpath.startsWith("/") || xpath.startsWith("//"))) {
+                xpath = this.xpath + xpath;
+            }
             selectionAutoPilot.selectXPath(xpath);
 
             int xpathResultIndex = selectionAutoPilot.evalXPath();
@@ -134,7 +139,7 @@ class VtdXmlParserContext implements XmlContext {
                 } else {
                     final VTDNav clonedNavigation = selectionNavigation.cloneNav();
                     final AutoPilot clonedAutoPilot = new AutoPilot(clonedNavigation);
-                    xmlElements.add(new VtdXmlParserContext(clonedAutoPilot, clonedNavigation, registeredNamespaces));
+                    xmlElements.add(new VtdXmlParserContext(xpath, clonedAutoPilot, clonedNavigation, registeredNamespaces));
                 }
                 xpathResultIndex = selectionAutoPilot.evalXPath();
             }

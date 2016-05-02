@@ -167,15 +167,10 @@ public class FralaxQualifiedNamespaceTest {
     public void testNestedSelect() throws Exception {
         final Optional<XmlContext> context = xml.select("//b:book[@id='bk001']");
         assertTrue(context.isPresent());
-        final Optional<XmlContext> context1 = context.get().select("b:author");
+        final Optional<XmlContext> context1 = context.get().select("//b:author");
         assertTrue(context1.isPresent());
         assertEquals("<b:author>Writer</b:author>", context1.get().asString(true));
     }
-
-    /*
-    intended behavior: xml.select("//b:book[@id='bk001']").select(b:author);
-     */
-
 
 }
 
