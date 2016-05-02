@@ -175,19 +175,13 @@ class VtdXmlParserContext implements XmlContext {
         }
         try {
             final int index = selectionNavigation.getCurrentIndex();
-            final StringBuilder curElement = new StringBuilder();
-            curElement.append("<").append(selectionNavigation.toNormalizedString(index));
+            final StringBuilder curElement = new StringBuilder("<").append(selectionNavigation.toNormalizedString(index));
             for (String attribute : evaluateAttributes()) {
                 curElement.append(" ").append(attribute);
             }
             final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(formatted, selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
             //check size so we can be sure this isn't just a single value object/an empty object (e.g <author>Hitchcock</author> shouldn't be linebroken/indented.)
-            if (formatted && childrenAndSiblings.children.size() > 1) {
-                curElement.append(">\n");
-            }
-            else {
-                curElement.append(">");
-            }
+            curElement.append(formatted && childrenAndSiblings.children.size() > 1 ? ">\n" : ">");
             String oldCurElement = curElement.toString();
             //same as above comment
             childrenAndSiblings.children.forEach(formatted  && childrenAndSiblings.children.size() > 1 ? curElement.append("    ")::append : curElement::append);
