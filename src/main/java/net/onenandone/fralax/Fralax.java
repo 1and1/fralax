@@ -40,4 +40,19 @@ public class Fralax {
         }
     }
 
+    /**
+     * Returns a managed context if {@code managed} is set to {@code true}, otherwise the same context {@link #parse(String, Class)} would return.
+     *
+     * @param file           file to parse.
+     * @param xmlParserClass the class of the specific parser to create.
+     * @param managed        boolean flag indicating whether the returned context should be kept up to date
+     * @return a managed context if {@code managed} is set to {@code true}, otherwise the same context {@link #parse(String, Class)} would return
+     */
+    public static XmlContext parse(final String file, final Class<? extends XmlParser> xmlParserClass, final boolean managed) {
+        if (managed) {
+            return new ManagedXmlContext(file, xmlParserClass);
+        }
+        return parse(file, xmlParserClass);
+    }
+
 }
