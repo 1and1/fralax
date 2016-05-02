@@ -154,6 +154,11 @@ class VtdXmlParserContext implements XmlContext {
 
     @Override
     public String asString() {
+        return asString(false);
+    }
+
+    @Override
+    public String asString(final boolean formatted) {
         final VTDNav selectionNavigation = navigation.cloneNav();
         if (selectionNavigation.getCurrentIndex() == selectionNavigation.getRootIndex()) {
             try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -163,29 +168,31 @@ class VtdXmlParserContext implements XmlContext {
                 // try to create string otherwise
             }
         }
-
         try {
             final int index = selectionNavigation.getCurrentIndex();
-            String curElement = "<" + selectionNavigation.toNormalizedString(index);
+            final StringBuilder curElement = new StringBuilder();
+            curElement.append("<").append(selectionNavigation.toNormalizedString(index));
             for (String attribute : evaluateAttributes()) {
-                curElement = curElement + " " + attribute;
+                curElement.append(" ").append(attribute);
             }
-            curElement = curElement + ">";
-            String curOldElement = curElement;
-            final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
-            for (final String childChild : childrenAndSiblings.children) {
-                curElement = curElement + childChild;
+            final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(formatted, selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
+            //check size so we can be sure this isn't just a single value object/an empty object (e.g <author>Hitchcock</author> shouldn't be linebroken/indented.)
+            if (formatted && childrenAndSiblings.children.size() > 1) {
+                curElement.append(">\n");
             }
-            for (final String childSibling : childrenAndSiblings.siblings) {
-                curElement = curElement + childSibling;
+            else {
+                curElement.append(">");
             }
-            if (curOldElement.equals(curElement)) {
+            String oldCurElement = curElement.toString();
+            //same as above comment
+            childrenAndSiblings.children.forEach(formatted  && childrenAndSiblings.children.size() > 1 ? curElement.append("    ")::append : curElement::append);
+            childrenAndSiblings.siblings.forEach(curElement::append);
+            if (curElement.toString().equals(oldCurElement)) {
                 selectionNavigation.recoverNode(index);
-                curElement = curElement + selectionNavigation.getXPathStringVal();
+                curElement.append(selectionNavigation.getXPathStringVal());
             }
-            curElement = curElement + "</" + selectionNavigation.toNormalizedString(index) + ">";
-
-            return curElement;
+            curElement.append("</").append(selectionNavigation.toNormalizedString(index)).append(">");
+            return curElement.toString();
         } catch (NavException e) {
             throw new FralaxException("failed to transform to string", e);
         }
@@ -219,22 +226,22 @@ class VtdXmlParserContext implements XmlContext {
      * @return A List of Lists with 2 elements: Element at index 0 is the children of the current Node. Element at index 1 is the siblings of the current node.
      * @throws NavException Error that occurs when the traversing of Nodes fails.
      */
-    private ChildrenAndSiblings evaluateChildrenAndSiblings(final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
+    private ChildrenAndSiblings evaluateChildrenAndSiblings(final boolean formatted, final int rootDepth, final int parentIndex, final int startDepth) throws NavException {
         ChildrenAndSiblings childrenAndSiblings = new ChildrenAndSiblings();
+        final int startNesting = navigation.getNestingLevel();
         //Traversing children, uses startDepth as a check as we don't need to traverse already visited child nodes.
         if (navigation.toElement(VTDNav.FIRST_CHILD) && startDepth < navigation.getCurrentDepth()) {
-            traverse(rootDepth, startDepth, childrenAndSiblings.children);
+            traverse(formatted, startNesting, rootDepth, startDepth, childrenAndSiblings.children);
         } else {
             childrenAndSiblings.children.add(navigation.getXPathStringVal());
         }
 
         //After traversing all children nodes we now go back to our parent element and traverse all our siblings.
         navigation.recoverNode(parentIndex);
-        //Assignment so the next sibling traversal uses correct depth to determine if we should search for more children.
-        final int newStartDepth = startDepth - 1;
         //Traversing siblings, uses rootDepth in the check so we don't keep on checking siblings of the node we start our search from.
         if (navigation.toElement(VTDNav.NEXT_SIBLING) && rootDepth < navigation.getCurrentDepth()) {
-            traverse(rootDepth, newStartDepth, childrenAndSiblings.siblings);
+            //depth /level -1 to account for traversing back to parent
+            traverse(formatted, startNesting - 1, rootDepth, startDepth - 1, childrenAndSiblings.siblings);
         }
         return childrenAndSiblings;
     }
@@ -248,21 +255,28 @@ class VtdXmlParserContext implements XmlContext {
      * @param elements   the elements to fill.
      * @throws NavException thrown when an error occurs navigating through the context.
      */
-    private void traverse(final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
+    private void traverse(final boolean formatted, final int startNesting, final int rootDepth, final int startDepth, final List<String> elements) throws NavException {
         int curIndex = navigation.getCurrentIndex();
-        String child = "<";
-        child = child + navigation.toNormalizedString(curIndex);
+        StringBuilder child = new StringBuilder();
+        if (formatted) {
+            for (int i = 0; i < navigation.getNestingLevel() - startNesting; i++) {
+                child.append("    ");
+            }
+        }
+        child.append("<");
+        child.append(navigation.toNormalizedString(curIndex));
         for (final String attribute : evaluateAttributes()) {
-            child = child + " " + attribute;
+            child.append(" ").append(attribute);
         }
-        child = child + ">";
+        child.append(">");
         ChildrenAndSiblings childrenAndSiblings;
-        childrenAndSiblings = evaluateChildrenAndSiblings(rootDepth, curIndex, startDepth + 1);
-        for (final String childChild : childrenAndSiblings.children) {
-            child = child + childChild;
+        childrenAndSiblings = evaluateChildrenAndSiblings(formatted, rootDepth, curIndex, startDepth + 1);
+        childrenAndSiblings.children.forEach(child::append);
+        child.append("</").append(navigation.toNormalizedString(curIndex)).append(">");
+        if (formatted) {
+            child.append("\n");
         }
-        child = child + "</" + navigation.toNormalizedString(curIndex) + ">";
-        elements.add(child);
+        elements.add(child.toString());
         elements.addAll(childrenAndSiblings.siblings);
     }
 
