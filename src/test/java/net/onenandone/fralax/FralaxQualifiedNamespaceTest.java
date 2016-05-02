@@ -20,22 +20,22 @@ public class FralaxQualifiedNamespaceTest {
     @Test
     public void setNoSelectToString() throws Exception {
         assertEquals(
-                "<b:books xmlns:b=\"urn:books:qualified\">\n" +
-                        "\t<b:book id=\"bk001\">\n" +
-                        "\t\t<b:author>Writer</b:author>\n" +
-                        "\t\t<b:title>The First Book</b:title>\n" +
-                        "\t\t<b:genre>Fiction</b:genre>\n" +
-                        "\t\t<b:price>44.95</b:price>\n" +
-                        "\t\t<b:pub_date>2000-10-01</b:pub_date>\n" +
-                        "\t\t<b:review>An amazing story of nothing.</b:review>\n" +
-                        "\t</b:book>\n" +
-                        "\t<b:book id=\"bk002\">\n" +
-                        "\t\t<b:author>Poet</b:author>\n" +
-                        "\t\t<b:title>The Poet's First Poem</b:title>\n" +
-                        "\t\t<b:genre>Poem</b:genre>\n" +
-                        "\t\t<b:price>24.95</b:price>\n" +
-                        "\t\t<b:review>Least poetic poems.</b:review>\n" +
-                        "\t</b:book>\n" +
+                "<?xml version=\"1.0\"?>\n" + "<b:books xmlns:b=\"urn:books:qualified\">\n" +
+                        "    <b:book id=\"bk001\">\n" +
+                        "        <b:author>Writer</b:author>\n" +
+                        "        <b:title>The First Book</b:title>\n" +
+                        "        <b:genre>Fiction</b:genre>\n" +
+                        "        <b:price>44.95</b:price>\n" +
+                        "        <b:pub_date>2000-10-01</b:pub_date>\n" +
+                        "        <b:review>An amazing story of nothing.</b:review>\n" +
+                        "    </b:book>\n\n" +
+                        "    <b:book id=\"bk002\">\n" +
+                        "        <b:author>Poet</b:author>\n" +
+                        "        <b:title>The Poet's First Poem</b:title>\n" +
+                        "        <b:genre>Poem</b:genre>\n" +
+                        "        <b:price>24.95</b:price>\n" +
+                        "        <b:review>Least poetic poems.</b:review>\n" +
+                        "    </b:book>\n" +
                         "</b:books>",
                 xml.asString(true)
         );
@@ -124,12 +124,12 @@ public class FralaxQualifiedNamespaceTest {
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<b:book id=\"bk001\">\n" +
-                        "\t<b:author>Writer</b:author>\n" +
-                        "\t<b:title>The First Book</b:title>\n" +
-                        "\t<b:genre>Fiction</b:genre>\n" +
-                        "\t<b:price>44.95</b:price>\n" +
-                        "\t<b:pub_date>2000-10-01</b:pub_date>\n" +
-                        "\t<b:review>An amazing story of nothing.</b:review>\n" +
+                        "    <b:author>Writer</b:author>\n" +
+                        "    <b:title>The First Book</b:title>\n" +
+                        "    <b:genre>Fiction</b:genre>\n" +
+                        "    <b:price>44.95</b:price>\n" +
+                        "    <b:pub_date>2000-10-01</b:pub_date>\n" +
+                        "    <b:review>An amazing story of nothing.</b:review>\n" +
                         "</b:book>",
                 optionalContext.get().asString(true)
         );
@@ -149,7 +149,7 @@ public class FralaxQualifiedNamespaceTest {
     }
 
     @Test
-    public void testSelectMutiple() throws Exception {
+    public void testSelectMultiple() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//b:author | //b:title");
         assertFalse(contexts.isEmpty());
         assertEquals("<b:author>Writer</b:author>",
@@ -163,6 +163,14 @@ public class FralaxQualifiedNamespaceTest {
 
     }
 
+    @Test
+    public void testNestedSelect() throws Exception {
+        final Optional<XmlContext> context = xml.select("//b:book[@id='bk001']");
+        assertTrue(context.isPresent());
+        final Optional<XmlContext> context1 = context.get().select("//b:author");
+        assertTrue(context1.isPresent());
+        assertEquals("<b:author>Writer</b:author>", context1.get().asString(true));
+    }
 
 }
 

@@ -101,12 +101,12 @@ public class FralaxUnqualifiedNamespaceTest {
         assertNotNull(optionalContext);
         assertTrue(optionalContext.isPresent());
         assertEquals("<book id=\"bk001\">\n" +
-                        "\t<author>Writer</author>\n" +
-                        "\t<title>The First Book</title>\n" +
-                        "\t<genre>Fiction</genre>\n" +
-                        "\t<price>44.95</price>\n" +
-                        "\t<pub_date>2000-10-01</pub_date>\n" +
-                        "\t<review>An amazing story of nothing.</review>\n" +
+                        "    <author>Writer</author>\n" +
+                        "    <title>The First Book</title>\n" +
+                        "    <genre>Fiction</genre>\n" +
+                        "    <price>44.95</price>\n" +
+                        "    <pub_date>2000-10-01</pub_date>\n" +
+                        "    <review>An amazing story of nothing.</review>\n" +
                         "</book>",
                 optionalContext.get().asString(true)
         );
@@ -126,7 +126,7 @@ public class FralaxUnqualifiedNamespaceTest {
     }
 
     @Test
-    public void testSelectMutiple() throws Exception {
+    public void testSelectMultiple() throws Exception {
         final List<XmlContext> contexts = xml.selectAll("//author | //title");
         assertFalse(contexts.isEmpty());
         assertEquals("<author>Writer</author>",
