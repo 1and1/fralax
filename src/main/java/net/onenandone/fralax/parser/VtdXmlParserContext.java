@@ -166,7 +166,7 @@ class VtdXmlParserContext implements XmlContext {
     public String asString(final boolean formatted) {
         final VTDNav selectionNavigation = navigation.cloneNav();
         if (selectionNavigation.getCurrentIndex() == selectionNavigation.getRootIndex()) {
-            try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            try (final ByteArrayOutputStream outputStream= new ByteArrayOutputStream()) {
                 selectionNavigation.dumpXML(outputStream);
                 return outputStream.toString();
             } catch (final IOException e) {
@@ -176,26 +176,20 @@ class VtdXmlParserContext implements XmlContext {
         try {
             final int index = selectionNavigation.getCurrentIndex();
             final StringBuilder curElement = new StringBuilder("<").append(selectionNavigation.toNormalizedString(index));
-            for (String attribute : evaluateAttributes()) {
-                curElement.append(" ").append(attribute);
-            }
+            evaluateAttributes().forEach((str) -> curElement.append(" ").append(str));
             final ChildrenAndSiblings childrenAndSiblings = evaluateChildrenAndSiblings(formatted, selectionNavigation.getCurrentDepth(), index, selectionNavigation.getCurrentDepth());
             //check size so we can be sure this isn't just a single value object/an empty object (e.g <author>Hitchcock</author> shouldn't be linebroken/indented.)
             curElement.append(formatted && childrenAndSiblings.children.size() > 1 ? ">\n" : ">");
-            String oldCurElement = curElement.toString();
             //same as above comment
             childrenAndSiblings.children.forEach(formatted  && childrenAndSiblings.children.size() > 1 ? curElement.append("    ")::append : curElement::append);
             childrenAndSiblings.siblings.forEach(curElement::append);
-            if (curElement.toString().equals(oldCurElement)) {
-                selectionNavigation.recoverNode(index);
-                curElement.append(selectionNavigation.getXPathStringVal());
-            }
             curElement.append("</").append(selectionNavigation.toNormalizedString(index)).append(">");
             return curElement.toString();
         } catch (NavException e) {
             throw new FralaxException("failed to transform to string", e);
         }
     }
+
 
     /**
      * Used to get all Attributes of the Current Node.
