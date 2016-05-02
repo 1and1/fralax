@@ -26,12 +26,6 @@ class ValueContext implements XmlContext {
 
     /** Not supported. */
     @Override
-    public void registerNamespace(String key, String value) {
-        throw new UnsupportedOperationException("cannot register namespace for value");
-    }
-
-    /** Not supported. */
-    @Override
     public Optional<XmlContext> select(String xpath) throws FralaxException {
         throw new UnsupportedOperationException("cannot select elements within value context");
     }
