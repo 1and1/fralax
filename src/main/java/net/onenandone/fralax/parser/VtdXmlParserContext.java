@@ -258,9 +258,7 @@ class VtdXmlParserContext implements XmlContext {
         }
         child.append("<");
         child.append(navigation.toNormalizedString(curIndex));
-        for (final String attribute : evaluateAttributes()) {
-            child.append(" ").append(attribute);
-        }
+        evaluateAttributes().forEach(child.append(" ")::append);
         child.append(">");
         ChildrenAndSiblings childrenAndSiblings;
         childrenAndSiblings = evaluateChildrenAndSiblings(formatted, rootDepth, curIndex, startDepth + 1);
