@@ -40,4 +40,15 @@ public class Fralax {
         }
     }
 
+    /**
+     * Returns a managed context. It will reload the internal XML representation on an external change in the parsed file. Make sure
+     * to read {@link ManagedXmlContext#unmanaged()} for further information on management.
+     * @param file           file to parse.
+     * @param xmlParserClass the class of the specific parser to create.
+     * @return a managed context if {@code managed} is set to {@code true}, otherwise the same context {@link #parse(String, Class)} would return
+     */
+    public static ManagedXmlContext watch(final String file, final Class<? extends XmlParser> xmlParserClass) {
+        return new ManagedXmlContext(file, xmlParserClass);
+    }
+
 }
