@@ -1,11 +1,13 @@
 package net.onenandone.fralax;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-public class ManagedXmlContext implements XmlContext {
+/**
+ * A Managed XML Parser autoupdates the root context whenever you reacquire it.
+ */
+@SuppressWarnings("WeakerAccess")
+public class ManagedXmlParser {
 
     private static final Object MUTEX = new Object();
 
@@ -15,7 +17,7 @@ public class ManagedXmlContext implements XmlContext {
     private XmlContext rootContext;
     private long lastModification;
 
-    ManagedXmlContext(final String file, final Class<? extends XmlParser> xmlParserClass) {
+    ManagedXmlParser(final String file, final Class<? extends XmlParser> xmlParserClass) {
         Objects.requireNonNull(file, "the xml file may not be null");
         Objects.requireNonNull(xmlParserClass, "the xml parser class may not be null");
 
@@ -45,28 +47,12 @@ public class ManagedXmlContext implements XmlContext {
         }
     }
 
-    @Override
-    public Optional<XmlContext> select(final String xpath) throws FralaxException {
+    /**
+     * Returns a current version of the root xml context for the file.
+     * @return the (updated) root context.
+     */
+    public XmlContext getRootContext() {
         checkLastModification();
-        return this.rootContext.select(xpath);
+        return rootContext;
     }
-
-    @Override
-    public List<XmlContext> selectAll(final String xpath) throws FralaxException {
-        checkLastModification();
-        return this.rootContext.selectAll(xpath);
-    }
-
-    @Override
-    public String asString() {
-        checkLastModification();
-        return this.rootContext.asString();
-    }
-
-    @Override
-    public String asString(final boolean formatted) {
-        checkLastModification();
-        return this.rootContext.asString(formatted);
-    }
-
 }
