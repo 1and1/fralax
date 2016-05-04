@@ -18,18 +18,18 @@ import static org.junit.Assert.*;
  */
 public class ManagedXMLTest  {
 
-    private static ManagedXmlParser xmlParser;
+    private static ManagedXmlContext xmlParser;
     private static XmlContext xml;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        xmlParser = Fralax.parseAndManage(FralaxTest.class.getResource("/driverVehicleInfo.xml").getFile(), VtdXmlParser.class);
-        xml = xmlParser.getRootContext();
+        xmlParser = Fralax.watch(FralaxTest.class.getResource("/driverVehicleInfo.xml").getFile(), VtdXmlParser.class);
+        xml = xmlParser.unmanaged();
     }
 
     @Test
     public void testManagement() throws Exception {
-        assertEquals(xml.selectAll("//driver").size(), xmlParser.getRootContext().selectAll("//driver").size());
+        assertEquals(xml.selectAll("//driver").size(), xmlParser.selectAll("//driver").size());
 
         //Now Change the file
         BufferedWriter writer = new BufferedWriter(new FileWriter(FralaxTest.class.getResource("/driverVehicleInfo.xml").getFile()));
@@ -67,7 +67,7 @@ public class ManagedXMLTest  {
                 "    <name>Limousine</name>\n" +
                 "</vehicle>", oneVehicle.get().asString(true));
         //Now check if change happens when we call getRootContext
-        Optional<XmlContext> newContext = xmlParser.getRootContext().select("//vehicle[@id='RR1']");
+        Optional<XmlContext> newContext = xmlParser.select("//vehicle[@id='RR1']");
         //same xpath but now we updated so it isn't present anymore.
         assertFalse(newContext.isPresent());
     }
