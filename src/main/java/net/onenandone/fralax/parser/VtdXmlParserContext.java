@@ -116,18 +116,18 @@ class VtdXmlParserContext implements XmlContext {
     }
 
     @Override
-    public List<XmlContext> selectAll(String xpath) throws FralaxException {
+    public List<XmlContext> selectAll(final String xpath) throws FralaxException {
         final List<XmlContext> xmlElements = new ArrayList<>();
-
+        String xPathToSelect = xpath;
         final VTDNav selectionNavigation = navigation.cloneNav();
         final AutoPilot selectionAutoPilot = new AutoPilot(selectionNavigation);
         addNamespacesToAutopilot(selectionAutoPilot, registeredNamespaces);
 
         try {
             if (!this.xpath.equals("") && (xpath.startsWith("/") || xpath.startsWith("//"))) {
-                xpath = this.xpath + xpath;
+                xPathToSelect = this.xpath + xpath;
             }
-            selectionAutoPilot.selectXPath(xpath);
+            selectionAutoPilot.selectXPath(xPathToSelect);
 
             int xpathResultIndex = selectionAutoPilot.evalXPath();
             while (xpathResultIndex != -1) {
@@ -139,7 +139,7 @@ class VtdXmlParserContext implements XmlContext {
                 } else {
                     final VTDNav clonedNavigation = selectionNavigation.cloneNav();
                     final AutoPilot clonedAutoPilot = new AutoPilot(clonedNavigation);
-                    xmlElements.add(new VtdXmlParserContext(xpath, clonedAutoPilot, clonedNavigation, registeredNamespaces));
+                    xmlElements.add(new VtdXmlParserContext(xPathToSelect, clonedAutoPilot, clonedNavigation, registeredNamespaces));
                 }
                 xpathResultIndex = selectionAutoPilot.evalXPath();
             }
