@@ -50,7 +50,7 @@ class VtdXmlParserContext implements XmlContext {
 
     /**
      * Analyzes namespaces of the specified XML file.
-     * <p />
+     * <p/>
      * All namespaces will be registered by the prefix defined in the XML. The Xpath will therefore rely on the same namespace prefixes as of the XML.
      */
     private void analyzeNamespaces() {
@@ -98,9 +98,7 @@ class VtdXmlParserContext implements XmlContext {
 
     /** Adds all registered Namespaces to the Autopilot for evaluation. */
     private static void addNamespacesToAutopilot(final AutoPilot autopilot, final Map<String, String> registeredNamespaces) {
-        for (Map.Entry<String, String> entry : registeredNamespaces.entrySet()) {
-            autopilot.declareXPathNameSpace(entry.getKey(), entry.getValue());
-        }
+        registeredNamespaces.entrySet().forEach((Map.Entry<String, String> entry) -> autopilot.declareXPathNameSpace(entry.getKey(), entry.getValue()));
     }
 
     @Override
@@ -166,7 +164,7 @@ class VtdXmlParserContext implements XmlContext {
     public String asString(final boolean formatted) {
         final VTDNav selectionNavigation = navigation.cloneNav();
         if (selectionNavigation.getCurrentIndex() == selectionNavigation.getRootIndex()) {
-            try (final ByteArrayOutputStream outputStream= new ByteArrayOutputStream()) {
+            try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 selectionNavigation.dumpXML(outputStream);
                 return outputStream.toString();
             } catch (final IOException e) {
@@ -181,7 +179,7 @@ class VtdXmlParserContext implements XmlContext {
             //check size so we can be sure this isn't just a single value object/an empty object (e.g <author>Hitchcock</author> shouldn't be linebroken/indented.)
             curElement.append(formatted && childrenAndSiblings.children.size() > 1 ? ">\n" : ">");
             //same as above comment
-            childrenAndSiblings.children.forEach(formatted  && childrenAndSiblings.children.size() > 1 ? curElement.append("    ")::append : curElement::append);
+            childrenAndSiblings.children.forEach(formatted && childrenAndSiblings.children.size() > 1 ? curElement.append("    ")::append : curElement::append);
             childrenAndSiblings.siblings.forEach(curElement::append);
             curElement.append("</").append(selectionNavigation.toNormalizedString(index)).append(">");
             return curElement.toString();
